@@ -1,15 +1,5 @@
 const axios = require('axios');
 
-async function fetchData(url) {
-    try {
-        const response = await axios.post(url);
-        console.log(response.data);
-    } catch (error) {
-        console.error(error);
-    }
-}
-
-
 const API_KEY = 'xxx'
 const ENDPOINT_ID = 'ep-20240804225017-29q6l'
 

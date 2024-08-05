@@ -17,7 +17,7 @@ function set(obj, k, v) {
     }
 }
 
-function getTranslatorData(source, target) {
+function getMissContent(source, target) {
     const result = {}
     // 深度对比两个对象，找出source对象中有，但是target对象中没有的字段
     function findMissingFields(source, target, parentKey = '') {
@@ -57,5 +57,5 @@ function appendTranslatorData(source, additional) {
 
 
 module.exports = {
-    getTranslatorData, appendTranslatorData
+    getMissContent, appendTranslatorData
 }

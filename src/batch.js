@@ -29,9 +29,9 @@ function getAllFiles(folderPath) {
 }
 
 function batchExec(dirPath, fn) {
-    getAllFiles(dirPath).forEach((filePath) => {
+    getAllFiles(dirPath).forEach(async (filePath) => {
         const content = readFile(filePath)
-        fn(content, filePath)
+        await fn(content, filePath)
     })
 }
 
