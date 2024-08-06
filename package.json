@@ -1,12 +1,12 @@
 {
-  "name": "i18ntrans",
-  "version": "0.0.1",
+  "name": "i18n-ai-trans",
+  "version": "1.0.0",
   "description": "i18n-translate 是一个高效、简介的多语言翻译工具，安装后只需简单几步就能实现整个多语言文本的快速翻译。",
   "main": "index.js",
   "bin": {
-    "i18ntrans": "lib/index.js"
+    "i18n-ai-trans": "lib/index.js"
   },
-  "homepage": "https://github.com/liliangrong777/i18ntrans",
+  "homepage": "https://github.com/liliangrong777/i18n-ai-trans",
   "scripts": {
     "test:init": "node ./lib/index.js init",
     "test:translate": "node ./lib/index.js translate"
@@ -23,9 +23,6 @@
   "author": "liliangrong777<1198072497@qq.com>",
   "license": "MIT",
   "dependencies": {
-    "lodash": "^4.17.21"
-  },
-  "devDependencies": {
     "axios": "^1.7.3"
   }
 }
