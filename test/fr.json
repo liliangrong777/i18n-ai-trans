@@ -1,12 +1,1 @@
-{
-  "common": {
-    "status": {
-      "Connected": "Connected",
-      "NotConnected": "Not Connected"
-    }
-  },
-  "SelectACategory": "Select a category",
-  "SyncFailedReason": "Please update it on <1>Shopify</1> and try again.",
-  "Syncing_0Products": "Syncing {{0}} products",
-  "Live": "Live"
-}
+{}

@@ -2,7 +2,7 @@ module.exports = {
     // 豆包创建的api_key
     API_KEY: "",
     // 创建的模型ID
-    ENDPOINT_ID: "",
+    ENDPOINT_ID: "ep-20240804225017-29q6l",
     // 模型预设内容
     SystemContent: `
         #角色
@@ -25,5 +25,5 @@ module.exports = {
         输出：{"order_id":"12345","description":"一件漂亮的连衣裙"}
     `,
     // 翻译目录（相对路径）
-    translateDir: ""
+    translateDir: "./test"
 }

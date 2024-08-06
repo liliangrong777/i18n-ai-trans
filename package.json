@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node ./lib/index.js init"
+    "test:init": "node ./lib/index.js init",
+    "test:translate": "node ./lib/index.js translate"
   },
   "keywords": [],
   "author": "",
