@@ -4,8 +4,9 @@ const { getMissContent, appendTranslatorData } = require('./utils')
 const { batchExec } = require('./batch')
 const { translate } = require("./translate")
 
-const exec = (translateDirRelative, key, epId, SystemContent) => {
-    const absDir = path.join(progress.cwd(), translateDirRelative)
+const exec = (config) => {
+    const {translateDir,API_KEY,SystemContent,ENDPOINT_ID} = config
+    const absDir = path.join(progress.cwd(), translateDir)
     if (fs.statSync(absDir).isDirectory()) {
         throw '找不到需要翻译的目录：' + absDir
     }
@@ -21,7 +22,7 @@ const exec = (translateDirRelative, key, epId, SystemContent) => {
         const missContent = getMissContent(enContent, langContent)
         // 掉接口翻译内容
         const translatorData = await translate({
-            API_KEY: key, ENDPOINT_ID: epId, SystemContent, translateContent: missContent
+            API_KEY, ENDPOINT_ID, SystemContent, translateContent: missContent
         })
 
         // 将返回到内容JSON与原内容进行合并
