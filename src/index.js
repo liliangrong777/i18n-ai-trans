@@ -43,9 +43,3 @@ const exec = (config) => {
 module.exports = {
     exec
 }
-
-
-
-
-
-

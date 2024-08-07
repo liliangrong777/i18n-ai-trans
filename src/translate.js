@@ -22,6 +22,7 @@ async function translate({ API_KEY, ENDPOINT_ID, SystemContent, translateContent
                         "content": translateContent + ' ' + lang
                     }
                 ],
+                "temperature": 0.2
             }
         })
         const content = res.data.choices[0].message.content

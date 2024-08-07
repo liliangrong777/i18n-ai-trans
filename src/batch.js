@@ -10,11 +10,9 @@ function getAllFiles(folderPath) {
 
     function traverseFolder(currentPath) {
         const files = fs.readdirSync(currentPath)
-
         files.forEach((file) => {
             const filePath = path.join(currentPath, file)
             const isDir = fs.statSync(filePath).isDirectory()
-
             if (isDir) {
                 traverseFolder(filePath)
             } else {
@@ -22,9 +20,7 @@ function getAllFiles(folderPath) {
             }
         })
     }
-
     traverseFolder(folderPath)
-
     return filePaths
 }
 
@@ -38,7 +34,3 @@ function batchExec(dirPath, fn) {
 module.exports = {
     batchExec
 }
-
-
-
-
