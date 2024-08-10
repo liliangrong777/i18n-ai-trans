@@ -5,7 +5,7 @@ const { getMissContent, setMissContent, getLanguageContent, getLangStat, setLang
 const { translate } = require("./translate")
 
 const exec = (config) => {
-    const { translateDir, API_KEY, SystemContent, ENDPOINT_ID, sourceLang = 'en', langs } = config
+    const { translateDir, API_KEY, SystemContent, ENDPOINT_ID, sourceLang = 'en', langs = ['en', 'zh'] } = config
     const absDir = path.join(progress.cwd(), translateDir)
     if (!fs.statSync(absDir).isDirectory()) throw '找不到需要翻译的目录：' + absDir
 
@@ -21,17 +21,15 @@ const exec = (config) => {
         const langContent = getLanguageContent(absDir, lang)
         // 只需要翻译缺失和未翻译的字段
         const translateContent = getMissContent(enContent, langContent)
-        console.log(translateContent);
 
         if (!translateContent) return
-        // const [translatorData, error] = await translate({
-        //     API_KEY,
-        //     ENDPOINT_ID,
-        //     SystemContent,
-        //     lang,
-        //     translateContent
-        // })
-        const [translatorData, error] = [translateContent]
+        const [translatorData, error] = await translate({
+            API_KEY,
+            ENDPOINT_ID,
+            SystemContent,
+            lang,
+            translateContent
+        })
         if (translatorData) {
             // 填充翻译内容
             setMissContent(langContent, translatorData)

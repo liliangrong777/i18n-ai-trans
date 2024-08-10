@@ -5,43 +5,6 @@
 const fs = require("fs")
 const path = require("path")
 
-function set(obj, k, v) {
-    const keys = k.split('.')
-    let key, current = obj
-    while (key = keys.shift()) {
-        if (keys.length === 0) {
-            current[key] = v
-            break
-        }
-        if (!current[key]) {
-            current[key] = {}
-        }
-        current = current[key]
-    }
-}
-
-function getMissContent2(source, target) {
-    const result = {}
-    // 深度对比两个对象，找出source对象中有，但是target对象中没有的字段
-    function findMissingFields(source, target, parent) {
-        if (typeof source !== 'object') return
-        for (const key in source) {
-            // 把翻译内容为空，或者目前缺少的添加到翻译容器
-            if (!target[key]) {
-                parent[key] = source[key]
-                continue
-            }
-            if (typeof target[key] === 'object') {
-                if (!parent[key]) parent[key] = {}
-                findMissingFields(source[key], target[key], parent[key])
-            }
-        }
-    }
-    findMissingFields(source, target, result)
-    return result
-}
-
-
 function getMissContent(source, target) {
     if (typeof source !== 'object') return
     let res;
@@ -120,7 +83,6 @@ function setLanguageContent(absDir, lang, isDir, langContent) {
         }
         Object.keys(langContent).forEach(file => {
             const filePath = path.join(dirPath, file)
-            console.log(filePath);
             fs.writeFileSync(filePath, JSON.stringify(langContent[file], null, 2), "utf8")
         })
     } else {

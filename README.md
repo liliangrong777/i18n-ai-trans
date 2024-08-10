@@ -76,8 +76,8 @@ module.exports = {
 | `ENDPOINT_ID`   | 模型的[接入点ID](https://console.volcengine.com/ark/region:ark+cn-beijing/endpoint?config=%7B%7D)                                       |
 | `SystemContent` | 预制文本，设定模型的行为和背景，告知模型需要扮演的角色。可以查看[Prompt最佳实践](https://www.volcengine.com/docs/82379/1221660)了解更多 |
 | `translateDir`  | 需要翻译的文件夹目录（相对路径）                                                                                                        |
-| `sourceLang`    | 源语言                                                                                                                                  |
-| `langs`         | app需要支持哪些语言，例如：["en", "zh"]                                                                                                 |
+| `sourceLang?`   | 源语言 默认：en                                                                                                                         |
+| `langs?`        | app需要支持哪些语言，例如：["en", "zh"]                                                                                                 |
 
 
 ### 开始翻译
