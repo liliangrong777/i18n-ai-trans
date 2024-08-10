@@ -8,6 +8,7 @@
   },
   "homepage": "https://github.com/liliangrong777/i18n-ai-trans",
   "scripts": {
+    "release": "release-it",
     "test:init": "node ./lib/index.js init",
     "test:translate": "node ./lib/index.js translate"
   },
