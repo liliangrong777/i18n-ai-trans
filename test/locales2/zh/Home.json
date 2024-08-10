@@ -1,0 +1,10 @@
+{
+  "common": {
+    "status": {
+      "Connected": "Connected",
+      "NotConnected": "Not Connected"
+    }
+  },
+  "SelectACategory": "Select a category",
+  "NotConnected": "Not Connected"
+}

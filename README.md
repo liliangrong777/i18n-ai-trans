@@ -1,6 +1,6 @@
 # i18n-ai-trans
 
-**i18n-ai-trans** i18n-ai-trans 是一个高效、简介的多语言翻译工具，安装后只需简单几步就能实现整个多语言文本的快速翻译。
+**i18n-ai-trans** i18n-ai-trans 是一个高效、简洁的多语言翻译工具，开箱即用，零依赖，安装后只需简单几步就能实现整个多语言文本的快速翻译。
 
 ## 功能演示
 ![](https://media.giphy.com/media/7HhZwOLJAZ14kn7wlT/giphy.gif)
@@ -63,7 +63,11 @@ module.exports = {
         输出：{"order_id":"12345","description":"一件漂亮的连衣裙"}
     `,
     // 翻译目录（相对路径）
-    translateDir: ""
+    translateDir: "",
+    // 源语言,默认en
+    sourceLang: "en",
+    // app需要支持多少种语言
+    langs: ["en", "zh"]
 }
 ```
 | 配置字段        | 含义                                                                                                                                    |
@@ -72,6 +76,8 @@ module.exports = {
 | `ENDPOINT_ID`   | 模型的[接入点ID](https://console.volcengine.com/ark/region:ark+cn-beijing/endpoint?config=%7B%7D)                                       |
 | `SystemContent` | 预制文本，设定模型的行为和背景，告知模型需要扮演的角色。可以查看[Prompt最佳实践](https://www.volcengine.com/docs/82379/1221660)了解更多 |
 | `translateDir`  | 需要翻译的文件夹目录（相对路径）                                                                                                        |
+| `sourceLang`    | 源语言                                                                                                                                  |
+| `langs`         | app需要支持哪些语言，例如：["en", "zh"]                                                                                                 |
 
 
 ### 开始翻译
@@ -92,6 +98,5 @@ npx i18n-ai-trans translate
 - [ ] 目前只支持字节的火山方舟大模型，有需要的话还会接入其他AI。
   - [ ] chatGPT
   - [ ] 阿里通义
-- [ ] 有需要的话可以添加对namespace的支持。
 
 
