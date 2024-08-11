@@ -22,7 +22,10 @@ const exec = (config) => {
         // 只需要翻译缺失和未翻译的字段
         const translateContent = getMissContent(enContent, langContent)
 
-        if (!translateContent) return
+        if (!translateContent) {
+            console.log(`${lang} 尚未发现新增文本`);
+            return
+        }
         const [translatorData, error] = await translate({
             API_KEY,
             ENDPOINT_ID,

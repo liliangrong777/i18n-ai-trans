@@ -19,7 +19,7 @@ async function translate({ API_KEY, ENDPOINT_ID, SystemContent, translateContent
                     },
                     {
                         "role": "user",
-                        "content": translateContent + ' ' + lang
+                        "content": JSON.stringify(translateContent, null, 2) + ' ' + lang
                     }
                 ],
                 "temperature": 0.2
@@ -28,7 +28,8 @@ async function translate({ API_KEY, ENDPOINT_ID, SystemContent, translateContent
         const content = res.data.choices[0].message.content
         return [JSON.parse(content)]
     } catch (error) {
-        return [null, error.response.data.error]
+        console.error('translateError', error)
+        return [null, error.response?.data?.error]
     }
 }
 
