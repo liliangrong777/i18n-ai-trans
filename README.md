@@ -4,6 +4,7 @@
 
 ## 功能演示
 ![](https://media.giphy.com/media/7HhZwOLJAZ14kn7wlT/giphy.gif)
+![](https://media.giphy.com/media/nYUvsRocA0INuxyblZ/giphy.gif)
 
 ## 特点
 
