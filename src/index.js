@@ -10,7 +10,7 @@ const exec = (config) => {
     if (!fs.statSync(absDir).isDirectory()) throw '找不到需要翻译的目录：' + absDir
 
     const { isDir, isFile } = getLangStat(absDir, sourceLang)
-    if (!isDir && !isFile) throw `找不到 ${en} 需要翻译内容`
+    if (!isDir && !isFile) throw `找不到 ${sourceLang} 需要翻译内容`
 
     const translateLangs = langs.filter(item => item !== sourceLang)
 
