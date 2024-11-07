@@ -1,0 +1,11 @@
+{
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
+    "typeRoots": [
+      "./typings/"
+    ]
+  }
+}

@@ -1,0 +1,714 @@
+import { colors } from './constants'
+import { checkIsCartPage } from './util'
+
+export enum TypeEnum {
+  // 加到购物车中局部渲染方案
+  PartialRender = 1,
+  // 修改总价在submit时加入购物车方案
+  FakeUpdate = 2,
+}
+
+export interface Fitter {
+  // 1. 局部渲染方案. 2. fake dom方案
+  type: TypeEnum | string
+  // 小部件渲染锚点
+  anchor: string
+  // 小部件渲染位置,默认beforebegin,也就是渲染到锚点上方
+  position: 'afterbegin' | 'afterend' | 'beforebegin' | 'beforeend'
+  // 小部件在抽屉中的渲染锚点
+  dynamicAnchor: string
+  // 小部件在抽屉中的渲染位置
+  dynamicPosition: 'afterbegin' | 'afterend' | 'beforebegin' | 'beforeend'
+  // 购物车渲染块
+  updateSection: string
+  // 抽屉中购物车渲染块
+  dynamicUpdateSection: string
+  // 底部价格块
+  footerUpdateSection: string
+  // 抽屉底部价格块
+  dynamicFooterUpdateSection: string
+  // 更新购物车后是否刷新页面
+  isRefreshCartPage: boolean
+  // TODO: 后期删除 判断是否要新的方式插入
+  ppSeelCartTemplate: boolean
+  // 渲染的sections
+  // TODO: 后期需要改为字符串
+  sections: string
+  // 抽屉中渲染的section
+  dynamicSection: string
+  // 提交按钮块,主要用于方案2
+  submit: string
+  // 抽屉提交按钮块,主要用于方案2
+  dynamicSubmit: string
+  // 是否阻止事件冒泡，主要用于方案2
+  isPrevent: boolean
+}
+
+const anchorSelectors = () =>
+  checkIsCartPage()
+    ? [
+        '.cart__ctas',
+        '.atc-banner--container .atc-banner--outer .atc-banner--cart .atc-banner--cart-footer',
+        '.cart__buttons .cart__form',
+        '#cart_submit',
+        '.sf-cart__buttons-container',
+        '.cart-notification__links',
+        '.cart__footer .cart__ctas',
+        '.card__footer .btn--primary',
+        '.cart-total',
+        '.rebuy-cart__flyout-actions',
+        '.quick-cart__submit',
+        '.cart__summary .btn--primary',
+        '.cart-summary__actions',
+        '.cart__blocks .cart__ctas',
+        '.mini-cart-footer .mini-cart-btns',
+        '.sticky p.link-btn',
+        '.mini-cart__footer .button-container',
+        '.mini-cart-footer .btn-wrapper',
+        '.page-width .cart__ctas',
+        '.giraffly_Off-Canvas-Sheet__Container .giraffly_Off-Canvas-Footer',
+        'quick-add-modal .trim-margins #cart_form',
+        '.cart__footer--wrapper .cart__blocks .cart__ctas',
+        '#cartForm .cartfoot .abc',
+        '.cart__meta--desktop .button-wrapper',
+        '.cart__meta--mobile .button-wrapper',
+      ]
+    : [
+        '.cart__ctas',
+        '.drawer__footer .cart__submit-controls',
+        '.cart-drawer__footer>.button-group',
+        '.atc-banner--container .atc-banner--outer .atc-banner--cart .atc-banner--cart-footer',
+        '.cart__buttons .cart__form',
+        '#cart_submit',
+        '.sf-cart__buttons-container',
+        '.cart-notification__links',
+        '.cart__footer .cart__ctas',
+        '.card__footer .btn--primary',
+        '.drawer__footer .btn--primary',
+        '.cart-total',
+        '.rebuy-cart__flyout-actions',
+        '.drawer__footer .cart__ctas',
+        '.quick-cart__submit',
+        '.cart__summary .btn--primary',
+        '.cart-drawer-footer .show-loading-indicator',
+        '.cart-summary__actions',
+        '.cart__blocks .cart__ctas',
+        '.mini-cart-footer .mini-cart-btns',
+        '.sticky p.link-btn',
+        '.mini-cart__footer .button-container',
+        '.drawer__bottom .cart',
+        '.cart-drawer__footer .button-group',
+        '.mini-cart-footer .btn-wrapper',
+        '.page-width .cart__ctas',
+        '.giraffly_Off-Canvas-Sheet__Container .giraffly_Off-Canvas-Footer',
+        'quick-add-modal .trim-margins #cart_form',
+        '.mini--cart-drawer-footer .cart_notification_links_inner .cart_notification--footer',
+        '.cart__footer--wrapper .cart__blocks .cart__ctas',
+        '#cartForm .cartfoot .abc',
+        '.cart-drawer__bottom .cart__ctas',
+        '.m-cart-drawer__summary',
+        '.cart-drawer-subtotal__cta',
+        '.cart__meta--desktop .button-wrapper',
+        '.cart__meta--mobile .button-wrapper',
+      ]
+
+const submitSelectors = () =>
+  checkIsCartPage()
+    ? [
+        'button[name="checkout"][type="submit"]',
+        'input[name="checkout"][type="submit"]',
+        'a[href="/checkout"]',
+        'a[href="/checkout/"]',
+        'button[name="checkout"][form="cart"]',
+        'button[name="customer_checkout"][type="button"]',
+        '.mu-slider #mu-checkout-button',
+        '.wrapper-top-cart .dropdown-cart .btn',
+        'button[name="checkout"][type="button"]',
+        '.checkout-button',
+        'input[type="button"][value="Check out"]',
+        '.sezzle-checkout-button',
+        '.btn-checkout',
+        '#cart-sidebar-checkout',
+        '#cart-checkout',
+        'button[name="checkout"]',
+        '.card-footer .cart__checkout',
+        '#cart-content .action button',
+        '.rebuy-cart__checkout-button',
+        '.CustomCartRoot_button-checkout_3__Y2',
+        '.ymq-fake-checkout-btn',
+        '.checkout_btn',
+        '.tdf_btn_ck',
+        '.cart-order__recap .cart-form button[type="submit"]',
+        '.text-chackout',
+        '.cart_checkout_btn',
+        '.mini-cart__checkout',
+        '.link-btn button[name="checkout"][type="submit"]',
+        '.giraffly_PCPreviewbutton',
+        '.giraffly_Off-Canvas_Button',
+        '.ocu-cta__decline',
+        '.ocu-cta__buy',
+        '.checkout-link',
+        ".cart__checkout-button[name='checkout']",
+        '.qsc2-checkout-button',
+        '#checkout',
+        '.cart__footer .cart__checkout-button',
+        '.cart-notification__links .button--primary',
+        '.upcart-footer .upcart-checkout-button-container>a.upcart-checkout-button',
+        '#mu-checkout-button',
+        '.cart__checkout-button',
+        '._footer_lx1p7_9 ._buttonsWrapper_lx1p7_17 .picky-bundle-add-to-cart-button',
+        '.BottomBar--checkout .ButtonPrimaryCTA',
+        ".cart__checkout[name='checkout']",
+        ".footer .button[name='checkout']",
+        '.upcart-checkout-button[href="/checkout"]',
+        '.checkout-buttons .btn--large',
+        "#update-cart[name='checkout']",
+        ".button-group button[name='checkout']",
+        ".cart-footer button[name='checkout']",
+        ".Cart__Checkout[name='checkout']",
+        ".cart-total .button-primary[name='checkout'][aria-label='Check out']",
+        ".atc-banner--container .atc-banner--cart-footer .atc-button--checkout[name='checkout']",
+        '.satcb-cs-footer-sticky .satcb-cs-checkout-btn[data-terms]',
+        '.cart-checkout .mdc-ripple-upgraded[aria-label="Check out"]',
+        ".button-container .button[name='Checkout']",
+        ".upcart-checkout-button-container .upcart-checkout-button[href='/checkout']",
+        ".upcart-checkout-button[href='/checkout']",
+        '.upcart-checkout-button-container',
+        '.upcart-checkout-button',
+        ".giftbox-checkout-cloned[name='checkout']",
+        '.icartCheckoutBtnGroup .icart-checkout-btn',
+        ".checkout-btn[name='checkout']",
+        '#cart_submit[name="checkout"]',
+        ".scd__footer .scd__checkout[sc='checkout']",
+        ".scd__checkout[name='checkout']",
+        '.rebuy-cart__flyout-actions .rebuy-cart__checkout-button',
+        ".m-cart__checkout-button .m-button--primary[name='checkout']",
+        '.m-button--primary[name="checkout"]',
+        '.sf-cart__submit-controls [name="checkout"]',
+        '.col-md-4 .cartCheckout',
+        ".cart-form>button[name='checkout']",
+        ".buy-buttons .button[name='checkout']",
+        "#slidecart-checkout-form .button[name='checkout']",
+        '.cart__checkout',
+        '.upcart-checkout-button-container .upcart-checkout-button',
+        '.card__footer .btn--primary',
+        ".grouped-bottom .btn-actions  .button--checkout[name='checkout']",
+        ".btn-actions .btn-checkout[name='checkout']",
+        "[align='center']>button[type='submit']",
+        '.cart__footer .cart__ctas',
+        '.mini-cart-footer .mini-cart-btns .js-cart-btn-checkout',
+        '.btn-cart-checkout',
+        '.cart__footer .cart__ctas .cart__checkout-button',
+        '.upcart-checkout-button-container a.upcart-checkout-button',
+        '.picky-bundle-add-to-cart-button',
+        '.checkout_holder .checkout',
+        '.checkout-buttons .button',
+        ".cart__footer .cart__ctas .cart__checkout-button[name='checkout']",
+        ".slider-cart-box-wrapper .slider-cart-action-cta-buttons .slider-cart-action-link[name='checkout']",
+        ".cart_button_secure[href='/checkout ']",
+        ".cart_page_btn[name='checkout']",
+        '#cart-checkoutbtn .checkoutbtn-sticky >[href="/checkout"]',
+        '.checkout-buttons #update-cart[name="checkout"]',
+        '.styles_Footer__checkoutButton__kdn9J .upcart-checkout-button-container>.upcart-checkout-button[href="/checkout"]',
+        ".t4s-btn-group__checkout-update .t4s-btn__checkout[name='checkout']",
+        ".buy-buttons--compact button[name='checkout']",
+        ".cart-order__recap button[name='checkout']",
+        ".checkout-buttons .btn[href='/checkout']",
+        ".checkout-buttons .btn[name='checkout']",
+        ".cart__total .button--primary[name='checkout']",
+        ".minicart__bottom .button--primary[href='/checkout']",
+        ".add-to-cart__success--single .button--primary[href='/checkout']",
+        ".m-button--primary[name='checkout']",
+      ]
+    : [
+        'button[name="checkout"][type="submit"]',
+        'input[name="checkout"][type="submit"]',
+        'a[href="/checkout"]',
+        'a[href="/checkout/"]',
+        'button[name="checkout"][form="cart"]',
+        'button[name="customer_checkout"][type="button"]',
+        '.mu-slider #mu-checkout-button',
+        '.wrapper-top-cart .dropdown-cart .btn',
+        'button[name="checkout"][type="button"]',
+        '.checkout-button',
+        'input[type="button"][value="Check out"]',
+        '.sezzle-checkout-button',
+        '.btn-checkout',
+        '#cart-sidebar-checkout',
+        '#cart-checkout',
+        'button[name="checkout"]',
+        '.drawer__footer .btn--checkout',
+        '.card-footer .cart__checkout',
+        '#cart-content .action button',
+        '.rebuy-cart__checkout-button',
+        '.CustomCartRoot_button-checkout_3__Y2',
+        '.ymq-fake-checkout-btn',
+        '.checkout_btn',
+        '.tdf_btn_ck',
+        '.cart-order__recap .cart-form button[type="submit"]',
+        '.text-chackout',
+        '.cart_checkout_btn',
+        '#CartDrawer-Checkout',
+        '.mini-cart__checkout',
+        '.link-btn button[name="checkout"][type="submit"]',
+        '.giraffly_PCPreviewbutton',
+        '.giraffly_Off-Canvas_Button',
+        '.ocu-cta__decline',
+        '.ocu-cta__buy',
+        '.checkout-link',
+        ".cart__checkout-button[name='checkout']",
+        '.qsc2-checkout-button',
+        '#checkout',
+        '.cart__footer .cart__checkout-button',
+        '.cart-notification__links .button--primary',
+        '.drawer__footer .cart__checkout-button',
+        '.upcart-footer .upcart-checkout-button-container>a.upcart-checkout-button',
+        '#mu-checkout-button',
+        '.cart__checkout-button',
+        '._footer_lx1p7_9 ._buttonsWrapper_lx1p7_17 .picky-bundle-add-to-cart-button',
+        '.BottomBar--checkout .ButtonPrimaryCTA',
+        ".cart__checkout[name='checkout']",
+        ".footer .button[name='checkout']",
+        '.upcart-checkout-button[href="/checkout"]',
+        '.checkout-buttons .btn--large',
+        "#update-cart[name='checkout']",
+        '.cart-drawer__footer>.checkout-buttons[data-merge-attributes="checkout-buttons"]>.button[href="/checkout"]',
+        ".button-group button[name='checkout']",
+        '.cart-drawer__footer .button-group',
+        ".cart-footer button[name='checkout']",
+        ".Cart__Checkout[name='checkout']",
+        ".cart-total .button-primary[name='checkout'][aria-label='Check out']",
+        ".atc-banner--container .atc-banner--cart-footer .atc-button--checkout[name='checkout']",
+        '.satcb-cs-footer-sticky .satcb-cs-checkout-btn[data-terms]',
+        '.cart-checkout .mdc-ripple-upgraded[aria-label="Check out"]',
+        ".button-container .button[name='Checkout']",
+        ".upcart-checkout-button-container .upcart-checkout-button[href='/checkout']",
+        ".upcart-checkout-button[href='/checkout']",
+        '.upcart-checkout-button-container',
+        '.upcart-checkout-button',
+        ".giftbox-checkout-cloned[name='checkout']",
+        '.icartCheckoutBtnGroup .icart-checkout-btn',
+        '.qsc2-drawer-footer__summary .qsc2-checkout-button',
+        ".checkout-btn[name='checkout']",
+        '#cart_submit[name="checkout"]',
+        ".scd__footer .scd__checkout[sc='checkout']",
+        ".scd__checkout[name='checkout']",
+        '.rebuy-cart__flyout-actions .rebuy-cart__checkout-button',
+        ".m-cart__checkout-button .m-button--primary[name='checkout']",
+        '.m-button--primary[name="checkout"]',
+        '.sf-cart__submit-controls [name="checkout"]',
+        '.col-md-4 .cartCheckout',
+        ".cart-form>button[name='checkout']",
+        ".buy-buttons .button[name='checkout']",
+        "#slidecart-checkout-form .button[name='checkout']",
+        '.cart__checkout',
+        '.upcart-checkout-button-container .upcart-checkout-button',
+        '.card__footer .btn--primary',
+        ".js-cart-drawer-buttons .btn--primary[name='checkout']",
+        ".grouped-bottom .btn-actions  .button--checkout[name='checkout']",
+        ".btn-actions .btn-checkout[name='checkout']",
+        "[align='center']>button[type='submit']",
+        '.drawer__footer .cart__ctas',
+        '.cart__footer .cart__ctas',
+        '.mini-cart-footer .mini-cart-btns .js-cart-btn-checkout',
+        '.btn-cart-checkout',
+        '.cart-drawer .buy-buttons button[type="submit"]',
+        '.quick-buy-drawer__info .buy-buttons button[type="submit"]',
+        '.cart__footer .cart__ctas .cart__checkout-button',
+        '.upcart-checkout-button-container a.upcart-checkout-button',
+        '.picky-bundle-add-to-cart-button',
+        '.checkout_holder .checkout',
+        '.checkout-buttons .button',
+        ".cart__footer .cart__ctas .cart__checkout-button[name='checkout']",
+        ".cart-drawer__bottom .cart__checkout-button[name='checkout']",
+        ".slider-cart-box-wrapper .slider-cart-action-cta-buttons .slider-cart-action-link[name='checkout']",
+        ".cart_button_secure[href='/checkout ']",
+        ".cart_page_btn[name='checkout']",
+        '.cart-drawer-footer>.bg-primary-red>.d-flex>.btn-light[href="/checkout"]',
+        '#cart-checkoutbtn .checkoutbtn-sticky >[href="/checkout"]',
+        '.cart-drawer__footer>.checkout-buttons>.btn--large[href="/checkout"]',
+        '.checkout-buttons #update-cart[name="checkout"]',
+        '.styles_Footer__checkoutButton__kdn9J .upcart-checkout-button-container>.upcart-checkout-button[href="/checkout"]',
+        ".t4s-btn-group__checkout-update .t4s-btn__checkout[name='checkout']",
+        ".buy-buttons--compact button[name='checkout']",
+        ".cart-order__recap button[name='checkout']",
+        ".checkout-buttons .btn[href='/checkout']",
+        ".checkout-buttons .btn[name='checkout']",
+        ".cart__total .button--primary[name='checkout']",
+        ".minicart__bottom .button--primary[href='/checkout']",
+        ".add-to-cart__success--single .button--primary[href='/checkout']",
+        ".m-button--primary[name='checkout']",
+      ]
+
+function updateSectionSelectorList() {
+  return checkIsCartPage()
+    ? [
+        '.cart-content-item .cart-list',
+        '.t4s-cartPage__items',
+        '.t4s-mini_cart__items',
+        '.cart__items .js-contents',
+        '#cart-form',
+        '.m-cart__items',
+      ]
+    : [
+        '.cart-content-item .cart-list',
+        '.drawer__body .cart-drawer__form',
+        '.t4s-cartPage__items',
+        '.t4s-mini_cart__items',
+        '.cart-drawer__inner',
+        '.drawer__cart-items-wrappe',
+        '.cart-drawer',
+        '.cart__items .js-contents',
+        '.drawer__footer .cart-drawer__form',
+        '#cart-form',
+        '#Cart-Drawer .side-panel-inner .product-cart-item--container',
+        '.m-cart__items',
+        '.drawer__inner',
+        '.cart-drawer__items',
+      ]
+}
+
+const footerUpdateSectionSelectors = () =>
+  checkIsCartPage()
+    ? [
+        '.cart__subtotal + div',
+        '.cart-original-total',
+        '.cart__item-sub.cart__item-row div:last-child',
+        '.totals__subtotal-value',
+        '.Cart__Checkout span:last-child',
+        '.Cart__Total span:first-child',
+        '.cart-recap__price-line-price',
+        '.mini-cart__recap-price-line span:last-child',
+        '.subtotal span:first-child',
+        '.cart-subtotal__price',
+        '.cart-subtotal span:last-child',
+        '.cart__total-container span:last-child',
+        '.cart__footer-total span',
+        '.ajaxcart__subtotal .money',
+        '.subtotal .theme-money',
+        '.cart__total__money',
+        '#mini-cart-subtotal',
+        '.btn--large .uppercase',
+        '.btn--long .uppercase',
+        '.btn--large.uppercase',
+        '.uppercase.btn--long span:first-child',
+        '.cart__footer-page .cart__item-row .h3 span:last-child',
+        '.cart-total-price',
+        '.quick-cart__total .fs-body-bold',
+        '.cart-summary__subtotal .amount .theme-money',
+        '.cart__footer-right .fs-heading-4-base',
+        '[data-cart-footer] .border-t-section .grid-cols-14 .grid-cols-2 dd',
+        '.cart--total--price',
+        '.standard-title .theme-money',
+        '.cart-summary__total-price-row .theme-money',
+        '.cart-template__footer-info .type-body-extra-large',
+        '.quick-cart__footer .js-subtotal',
+        '.mini-cart__total .amount',
+        '[data-cart-final]',
+        '.price-preview #total-cart-bottom',
+        '.cartTotalSelector',
+        "[data-aid='cart-summary-info'] [data-aid='regular-price']",
+        '.align-center-mobile span.theme-money',
+        '.cart-block__subtotal .subtotal__price',
+        '.cart-button__total',
+        '#CartTotal>span:first-child',
+        '.\\#cart-subtotal-item-price',
+        '.\\#cart-notification-summary-total',
+        '.cart__subtotal-price',
+        '.totals__subtotal-value',
+        '.gocheckout .subtotal c strong',
+        '.cart__total-count',
+        '.grid--full .one-third p',
+        '[data-cart-total-price]',
+        '.tw-text-center .cart-price',
+        '.more>h3.row>span.value',
+        '.\\#cart-checkout-subtotal-value',
+        '.ajax-cart__header-wrapper .cart-title',
+        '.cart-total-line--total span.money',
+        '.mini-cart__total span.amount',
+        '.cart-subtotal .price',
+        '.quick-cart__footer-subtotal span.ff-body',
+        '.js-contents-foot .cart-items__total span:last-child',
+        '[data-cart-total]',
+        '.cart-mini-subtotal-value',
+        '[data-subtotal]:not(form)',
+        '.cart__footer-right p.fs-heading-base',
+        '.cart--external--total-price',
+        '.cart-details #CartTotal strong',
+        '.subtotal_amount span.money',
+        '[data-total-price]',
+        '.cart-totals .cart-price',
+        '.js-cart-item-price',
+        '#mini-cart-totals span:last-child',
+        '#main-cart-footer .totals-subtotal-value',
+        '.cart-template__footer-details .cart__subtotal',
+        '.subtotal-row .subtotal-amount .theme-money',
+        '.text-right [data-price]',
+        '.cart-summary-line .barracuda span:last-child',
+        '.cart__total .text-size--heading',
+        '[data-header-cart-total]',
+        '[data-cart-subtotal-price]',
+        '#StickySubtotal',
+        '#cart-total-final-price .money',
+        '.h3.cart__subtotal .money',
+        'tr.total .card-total-price',
+        '.minicart-footer .minicart-subtotal',
+        '.cart-subtotal p.cart-subtotal-price',
+        '.mu-subtotal span:last-child',
+        '[data-cart-total-price]',
+        '[data-cart-price]',
+        '#main .cart-order__recap div.h-stack.gap-4.justify-between span.h5:last-child.cart__checkout',
+        '[data-tbnadhide="HAS_DISCOUNT"]',
+        '[data-tbnadhide="NO_DISCOUNT"] s span',
+        '.slidecart-subtotal',
+        '.tt-cart-total-price',
+        '#grandtotal td',
+        '.revy-bundle-result-price .money',
+        '#CartSubtotal',
+        '.cart__subtotal',
+        '.u-margin-b-sm p.h4',
+        '.right .t-uppercase .money',
+        '.shopping-cart__total',
+        '.rebuy-cart__flyout-subtotal-amount',
+        '.cart-footer .total_price',
+        '.t4s-cart-total .t4s-cart__totalPrice',
+        '.js-contents .totals .totals__total-value',
+      ]
+    : [
+        '.cart__subtotal + div',
+        '.cart-original-total',
+        '.cart__item-sub.cart__item-row div:last-child',
+        '.totals__subtotal-value',
+        '.Cart__Checkout span:last-child',
+        '.Cart__Total span:first-child',
+        '.cart-recap__price-line-price',
+        '.mini-cart__recap-price-line span:last-child',
+        '.subtotal span:first-child',
+        '.cart-subtotal__price',
+        '.cart-subtotal span:last-child',
+        '.cart__total-container span:last-child',
+        '.cart__footer-total span',
+        '.ajaxcart__subtotal .money',
+        '.subtotal .theme-money',
+        '.cart__total__money',
+        '#mini-cart-subtotal',
+        '.btn--large .uppercase',
+        '.btn--long .uppercase',
+        '.btn--large.uppercase',
+        '.uppercase.btn--long span:first-child',
+        '.cart__footer-page .cart__item-row .h3 span:last-child',
+        '.cart-total-price',
+        '.quick-cart__total .fs-body-bold',
+        '.cart-summary__subtotal .amount .theme-money',
+        '.cart__footer-right .fs-heading-4-base',
+        '[data-cart-footer] .border-t-section .grid-cols-14 .grid-cols-2 dd',
+        '.cart--total--price',
+        '.standard-title .theme-money',
+        '.cart-summary__total-price-row .theme-money',
+        '.cart-template__footer-info .type-body-extra-large',
+        '.quick-cart__footer .js-subtotal',
+        '.mini-cart__total .amount',
+        '[data-cart-final]',
+        '.price-preview #total-cart-bottom',
+        '.cartTotalSelector',
+        "[data-aid='cart-summary-info'] [data-aid='regular-price']",
+        '.align-center-mobile span.theme-money',
+        '.cart-block__subtotal .subtotal__price',
+        '.cart-button__total',
+        '#CartTotal>span:first-child',
+        '.\\#cart-subtotal-item-price',
+        '.\\#cart-notification-summary-total',
+        '.cart__subtotal-price',
+        '.totals__subtotal-value',
+        '.gocheckout .subtotal c strong',
+        '.cart__total-count',
+        '.grid--full .one-third p',
+        '[data-cart-total-price]',
+        '.tw-text-center .cart-price',
+        '.more>h3.row>span.value',
+        '.\\#cart-checkout-subtotal-value',
+        '.ajax-cart__header-wrapper .cart-title',
+        '.cart-total-line--total span.money',
+        '.mini-cart__total span.amount',
+        '.cart-subtotal .price',
+        '.quick-cart__footer-subtotal span.ff-body',
+        '.js-contents-foot .cart-items__total span:last-child',
+        '[data-cart-total]',
+        '.cart-mini-subtotal-value',
+        '.cart-drawer__cart-total .money',
+        '[data-subtotal]:not(form)',
+        '.cart__footer-right p.fs-heading-base',
+        '.cart--external--total-price',
+        '.cart-details #CartTotal strong',
+        '.subtotal_amount span.money',
+        '[data-total-price]',
+        '.cart-totals .cart-price',
+        '.js-cart-item-price',
+        '#mini-cart-totals span:last-child',
+        '#main-cart-footer .totals-subtotal-value',
+        '.cart-template__footer-details .cart__subtotal',
+        '.subtotal-row .subtotal-amount .theme-money',
+        '.text-right [data-price]',
+        '.cart-summary-line .barracuda span:last-child',
+        '.cart__total .text-size--heading',
+        '[data-header-cart-total]',
+        '[data-cart-subtotal-price]',
+        '#StickySubtotal',
+        '#cart-total-final-price .money',
+        '.h3.cart__subtotal .money',
+        'tr.total .card-total-price',
+        '.drawer__footer p.ajaxcart__price',
+        '.minicart-footer .minicart-subtotal',
+        '.cart-subtotal p.cart-subtotal-price',
+        '.mu-subtotal span:last-child',
+        '[data-cart-total-price]',
+        '.yv-side-drawer-container .bottom-cart-box .totle-price .h4',
+        '[data-cart-price]',
+        '#cart-drawer div.h-stack.gap-4.justify-between span.h5:last-child',
+        '#main .cart-order__recap div.h-stack.gap-4.justify-between span.h5:last-child.cart__checkout',
+        '[data-tbnadhide="HAS_DISCOUNT"]',
+        '[data-tbnadhide="NO_DISCOUNT"] s span',
+        '.slidecart-subtotal',
+        '.tt-cart-total-price',
+        '#grandtotal td',
+        '.revy-bundle-result-price .money',
+        '#CartSubtotal',
+        '.cart__subtotal',
+        '.u-margin-b-sm p.h4',
+        '.right .t-uppercase .money',
+        '.shopping-cart__total',
+        '.rebuy-cart__flyout-subtotal-amount',
+        '.cart-footer .total_price',
+        '.t4s-cart-total .t4s-cart__totalPrice',
+        '.js-contents .totals .totals__total-value',
+        '.cart-drawer__footer .totals .totals__total-value',
+      ]
+
+export function getMatchedGlobalSelector() {
+  const map = {
+    anchor: anchorSelectors(),
+    submit: submitSelectors(),
+    updateSection: updateSectionSelectorList(),
+    footerUpdateSection: footerUpdateSectionSelectors(),
+  }
+  const res = {
+    anchor: '',
+    submit: '',
+    updateSection: '',
+    footerUpdateSection: '',
+  }
+  Object.entries(map).forEach(([key, value]) => {
+    res[key] =
+      value.find((item) => {
+        return document.querySelector(item)
+      }) ?? ''
+  })
+  return res
+}
+
+export const globalFitter: Fitter = {
+  type: TypeEnum['PartialRender'],
+  anchor: '',
+  position: 'beforebegin',
+  dynamicAnchor: '',
+  dynamicPosition: 'beforebegin',
+  updateSection: '',
+  dynamicUpdateSection: '',
+  footerUpdateSection: '',
+  dynamicFooterUpdateSection: '',
+  isRefreshCartPage: false,
+  ppSeelCartTemplate: false,
+  sections: '',
+  submit: '',
+  dynamicSubmit: '',
+  isPrevent: true,
+  dynamicSection: '',
+}
+
+export enum FrameBorder {
+  // 全局级别的配置
+  red = 'red',
+  // 主题级别的配置
+  blue = 'blue',
+  // 用户级别的配置
+  green = 'green',
+}
+
+export interface Matched {
+  // 查找的属性
+  key: string
+  // 查找到的配置的值
+  value: any
+  // 0 为用户配置，1 为主题配置，2 为全局配置
+  index: number
+  // 找到的该属性的配置信息
+  config: Fitter
+}
+
+export class Fitters {
+  configs: (null | Fitter)[] = [null, null, globalFitter]
+  constructor(userFitter?: Fitter, themeFitter?: Fitter) {
+    this.configs[0] = userFitter ?? null
+    this.configs[1] = themeFitter ?? null
+  }
+
+  // 获取某个值
+  getValue = (key: keyof Fitter) => {
+    return this.getMatched(key)?.value ?? ''
+  }
+
+  getColor = (key: keyof Fitter) => {
+    const items = this.getAllMatched(key as any)
+    const userItem = items.find((item) => item.index === 0)
+    const themeItem = items.find((item) => item.index === 1)
+    //  当用户值和主题值存在且相同时，显示主题颜色
+    const isShowThemeColor =
+      userItem && themeItem && userItem.value === themeItem.value
+    const color = isShowThemeColor ? colors[1] : colors[items[0]?.index]
+    return color
+  }
+
+  // 获取查找到的权重最高的fitter
+  getMatched = (key: keyof Fitter) => {
+    const allMatched = this.getAllMatched(key)
+
+    return allMatched[0] ?? null
+  }
+
+  // 判断是否值为空
+  private isEmpty(value: any) {
+    if (value === undefined || value === null) return true
+    if (typeof value === 'string') {
+      return value.trim() === ''
+    }
+    return false
+  }
+
+  // 获取某个值可用的所有fitter
+  getAllMatched = (key: keyof Fitter) => {
+    const result: Matched[] = []
+    this.configs.forEach((item, index) => {
+      if (item && !this.isEmpty(item[key])) {
+        result.push({
+          key: key,
+          value: item[key],
+          index: index,
+          config: item,
+        })
+      }
+    })
+    return result
+  }
+}
+
+export function createFitter(userFitter?: Fitter, themeFitter?: Fitter) {
+  const fitters = new Fitters(userFitter, themeFitter)
+  return new Proxy(globalFitter, {
+    get(_, key: keyof Fitter) {
+      return fitters.getValue(key)
+    },
+    set() {
+      throw 'fitter is readonly'
+    },
+  })
+}
