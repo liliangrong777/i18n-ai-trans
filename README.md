@@ -1,4 +1,5 @@
 # WXT + React
+pnpm version: 9.7.1
 
 pnpm dev 开启插件测试
 
