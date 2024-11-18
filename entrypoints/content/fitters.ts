@@ -701,14 +701,3 @@ export class Fitters {
   }
 }
 
-export function createFitter(userFitter?: Fitter, themeFitter?: Fitter) {
-  const fitters = new Fitters(userFitter, themeFitter)
-  return new Proxy(globalFitter, {
-    get(_, key: keyof Fitter) {
-      return fitters.getValue(key)
-    },
-    set() {
-      throw 'fitter is readonly'
-    },
-  })
-}
