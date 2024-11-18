@@ -1,7 +1,7 @@
 import { ShopifyInfo } from './getShopifyInfo'
 import '@/assets/main.css'
 
-import { Config, FittersData } from './apis.d'
+import { Config } from './apis.d'
 import Panel from '@/components/Panel.tsx'
 import { pcopy } from '@/utils/utils.ts'
 import { setIsFit, setLocalFit } from '@/entrypoints/content/apis.ts'
@@ -11,10 +11,10 @@ interface AppInfoPanelProps {
   shopifyInfo: ShopifyInfo
   userConfig: Config
   userFitter: Fitter
-  fitterRes: FittersData
+  themeName: string
 }
 const AppInfoPanel = (props: AppInfoPanelProps) => {
-  const { shopifyInfo, userConfig, userFitter, fitterRes } = props
+  const { shopifyInfo, userConfig, userFitter, themeName } = props
   const [isPanelShow, setIsPanelShow] = useState(true)
 
   return (
@@ -47,10 +47,10 @@ const AppInfoPanel = (props: AppInfoPanelProps) => {
         <strong
           className={'cursor-copy'}
           onClick={() => {
-            pcopy(fitterRes.theme_name)
+            pcopy(themeName)
           }}
         >
-          {fitterRes.theme_name}
+          {themeName}
         </strong>
       </div>
       <div>

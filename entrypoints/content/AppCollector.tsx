@@ -6,7 +6,6 @@ import { checkIsCartPage, getLimitedSelector } from './util'
 
 import {
   Fitter,
-  Matched,
   getMatchedGlobalSelector,
 } from '@/entrypoints/content/fitters.ts'
 
@@ -17,10 +16,9 @@ function guessPage() {
 interface AppCollectorProps {
   userFitter: Fitter
   setUserFitter: React.Dispatch<React.SetStateAction<Fitter>>
-  getValue: (key: keyof Fitter) => string
 }
 const AppCollector = (props: AppCollectorProps) => {
-  const { userFitter, setUserFitter, getValue } = props
+  const { userFitter, setUserFitter } = props
   const [open, setOpen] = useState(false)
   const [page, setPage] = useState('cart')
   const [type, setType] = useState('anchor')
@@ -79,7 +77,7 @@ const AppCollector = (props: AppCollectorProps) => {
               if (checkIsCartPage()) return key
               return `dynamic${key.replace(key[0], key[0].toUpperCase())}`
             }
-            if (!getValue(key as any)) {
+            if (!userFitter[key]) {
               const isLimitKey = ['submit', 'anchor'].some((item) =>
                 key.includes(item)
               )
@@ -213,12 +211,9 @@ export default AppCollector
 interface useSelectorRenderProps {
   userFitter: Fitter
   isShow: boolean
-  getColor: (key: keyof Fitter) => string
-  getMatched: (key: keyof Fitter) => Matched
-  getValue: (key: keyof Fitter) => string
 }
 export function useSelectorRender(props: useSelectorRenderProps) {
-  const { isShow, getMatched, getValue, getColor } = props
+  const { isShow, userFitter } = props
 
   const borderStyles = useMemo(
     function () {
@@ -233,11 +228,11 @@ export function useSelectorRender(props: useSelectorRenderProps) {
 
       const styles: string[] = []
       borderKeys.forEach((borderKey) => {
-        const item = getMatched(borderKey)
+        const item = userFitter[borderKey]
         if (item) {
           styles.push(`
-                ${item.value}{
-                    border:3px solid ${getColor(item.key as any)};
+                ${item}{
+                    border:3px solid green;
                 }
         `)
         }
@@ -245,7 +240,7 @@ export function useSelectorRender(props: useSelectorRenderProps) {
 
       return styles.join('\r\n')
     },
-    [getColor, getMatched]
+    [userFitter]
   )
 
   const rerender = useCallback(
@@ -255,16 +250,16 @@ export function useSelectorRender(props: useSelectorRenderProps) {
       document.querySelectorAll('.insurance-mock-block')?.forEach((item) => {
         item.remove()
       })
-      const anchor = getValue('anchor')
-      const dynamicAnchor = getValue('dynamicAnchor')
-      const dynamicPosition = getValue('dynamicPosition')
-      const position = getValue('position')
-      function createPlaceholder(anchor, position, color = getColor('anchor')) {
+      const anchor = userFitter.anchor
+      const dynamicAnchor = userFitter.dynamicAnchor
+      const dynamicPosition = userFitter.dynamicPosition
+      const position = userFitter.position
+      function createPlaceholder(anchor, position) {
         const nodes = document.querySelectorAll(anchor)
         nodes.forEach((item) => {
           item.insertAdjacentHTML(
             position,
-            `<div class="insurance-mock-block" style="padding: 20px 50px; background: ${color}; color:#fff;">insurance mock block</div>`
+            `<div class="insurance-mock-block" style="padding: 20px 50px; background: green; color:#fff;">insurance mock block</div>`
           )
         })
       }
@@ -279,14 +274,10 @@ export function useSelectorRender(props: useSelectorRenderProps) {
           )
         }
       } else {
-        anchor && createPlaceholder(anchor, position, getColor('anchor'))
+        anchor && createPlaceholder(anchor, position)
         dynamicAnchor &&
           anchor !== dynamicAnchor &&
-          createPlaceholder(
-            dynamicAnchor,
-            dynamicPosition,
-            getColor('dynamicAnchor')
-          )
+          createPlaceholder(dynamicAnchor, dynamicPosition)
       }
 
       // 为已选中的添加样式
@@ -298,7 +289,7 @@ export function useSelectorRender(props: useSelectorRenderProps) {
       }
       style.innerHTML = borderStyles
     },
-    [borderStyles, getColor, getValue, isShow]
+    [borderStyles, isShow, userFitter]
   )
 
   useEffect(() => {

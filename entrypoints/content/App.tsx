@@ -3,7 +3,11 @@ import { ShopifyInfo, getShopifyInfo } from './getShopifyInfo'
 import { Toast } from '@/components'
 import '@/assets/main.css'
 
-import { Fitter, Fitters, TypeEnum } from '@/entrypoints/content/fitters.ts'
+import {
+  Fitter,
+  TypeEnum,
+  globalFitter,
+} from '@/entrypoints/content/fitters.ts'
 import { getThemeFitInfo, getUserConfig } from '@/entrypoints/content/apis.ts'
 import { Config, FittersData } from '@/entrypoints/content/apis.d'
 import AppSubmitModal from './AppSubmitModal'
@@ -13,7 +17,6 @@ const App = () => {
   const [userConfig, setUserConfig] = useState<Config | null>(null)
 
   const [shopifyInfo, setShopifyInfo] = useState<ShopifyInfo | null>(null)
-
   const [userFitter, setUserFitter] = useState<Fitter>({
     type: TypeEnum['PartialRender'],
     anchor: '',
@@ -76,12 +79,14 @@ const App = () => {
       getThemeFitInfo(queryString),
     ])
     if (!resConfig || !resThemeInfo) return
+    if (resConfig.code !== 200 || resThemeInfo.code !== 200) return
     setUserConfig(resConfig.data)
-
     setFitterRes(resThemeInfo.data)
-    if (resThemeInfo.data.user) {
-      setUserFitter(resThemeInfo.data.user)
-    }
+    setUserFitter({
+      ...globalFitter,
+      ...resThemeInfo.data.theme,
+      ...resThemeInfo.data.user,
+    })
     if (resConfig.data.isFit !== 2 && resConfig.data.isLocalFit) {
       // TODO: 插入测试脚本
     }
@@ -90,20 +95,10 @@ const App = () => {
   // 是否适配中
   const isFitting = userConfig && !userConfig.isLocalFit
 
-  // TODO: 这里逻辑复杂化了，其实直接用userFitter就好了，主题那块的逻辑全部由后端处理
-  const { getMatched, getValue, getColor } = useMemo(() => {
-    return new Fitters(userFitter, undefined)
-  }, [userFitter])
-
   useSelectorRender({
     userFitter,
     isShow: !!isFitting,
-    getColor: getColor,
-    getMatched: getMatched,
-    getValue: getValue,
   })
-
-  const [showModal, setShowModal] = useState(false)
 
   if (!shopifyInfo || !userConfig) return null
   return (
@@ -116,30 +111,19 @@ const App = () => {
         shopifyInfo={shopifyInfo}
         userConfig={userConfig}
         userFitter={userFitter}
-        fitterRes={fitterRes}
+        themeName={fitterRes.theme_name}
       />
 
       {isFitting && (
-        <AppSubmitModal
-          showModal={showModal}
-          setShowModal={setShowModal}
-          userFitter={userFitter}
-          setUserFitter={setUserFitter}
-          shopifyInfo={shopifyInfo}
-          themeFitter={fitterRes.theme}
-          getColor={getColor}
-          getMatched={getMatched}
-        />
+        <>
+          <AppSubmitModal
+            userFitter={userFitter}
+            setUserFitter={setUserFitter}
+            shopifyInfo={shopifyInfo}
+          />
+          <AppCollector userFitter={userFitter} setUserFitter={setUserFitter} />
+        </>
       )}
-
-      {isFitting && (
-        <AppCollector
-          userFitter={userFitter}
-          setUserFitter={setUserFitter}
-          getValue={getValue}
-        />
-      )}
-
       <Toast />
     </div>
   )

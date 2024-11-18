@@ -1,7 +1,7 @@
 import { Modal, RadioGroup, Button, Input } from '@/components'
 import '@/assets/main.css'
 
-import { Fitter, Matched, TypeEnum } from './fitters.ts'
+import { Fitter, TypeEnum } from './fitters.ts'
 
 import { checkIsCartPage } from './util.ts'
 import { ShopifyInfo } from './getShopifyInfo.ts'
@@ -9,16 +9,12 @@ import { setThemeConfig } from './apis.ts'
 import classNames from 'classnames'
 interface AppSubmitModalProps {
   shopifyInfo: ShopifyInfo
-  showModal: boolean
-  setShowModal: (boolean) => void
   userFitter: Fitter
   setUserFitter: React.Dispatch<React.SetStateAction<Fitter>>
-  getColor: (key: keyof Fitter) => string
-  getMatched: (key: keyof Fitter) => Matched
 }
 const AppSubmitModal = (props: AppSubmitModalProps) => {
-  const { setShowModal, showModal, userFitter, setUserFitter, shopifyInfo } =
-    props
+  const [showModal, setShowModal] = useState(false)
+  const { userFitter, setUserFitter, shopifyInfo } = props
 
   const commonList = [
     {
