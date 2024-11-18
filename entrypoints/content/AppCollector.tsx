@@ -28,8 +28,6 @@ const AppCollector = (props: AppCollectorProps) => {
   const [selector, setSelector] = useState('')
 
   useLayoutEffect(() => {
-    browser.storage.local.clear()
-
     const app = new AppCore({
       onSelect(v, e) {
         setPage(guessPage())

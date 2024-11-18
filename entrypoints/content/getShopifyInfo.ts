@@ -4,7 +4,6 @@ export interface ShopifyInfo {
   locale: string
   currency: { active: string; rate: string }
   country: string
-  isInstalledInsurance: boolean
   theme: any
 }
 export function getShopifyInfo() {
@@ -14,7 +13,6 @@ export function getShopifyInfo() {
     locale: '',
     currency: { active: '', rate: '' },
     country: '',
-    isInstalledInsurance: false,
     theme: undefined,
   }
   const scripts = document.querySelectorAll('script')
@@ -35,13 +33,14 @@ export function getShopifyInfo() {
         }
       }
     }
-    if (
-      !info.isInstalledInsurance &&
-      scripts[i].src?.includes('ins-theme-app')
-    ) {
-      info.isInstalledInsurance = true
-    }
   }
   info.themeId = info.theme?.id ?? ''
   return info
+}
+
+export function checkAppEmbed() {
+  const scripts = [...document.querySelectorAll('script')]
+  const keyword =
+    window.__CurrentApp === 'P' ? 'ins-theme-app' : 'ins-theme-app'
+  return scripts.some((item) => item.src.includes(keyword))
 }

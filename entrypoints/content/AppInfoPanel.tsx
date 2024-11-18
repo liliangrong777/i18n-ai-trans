@@ -1,21 +1,38 @@
-import { ShopifyInfo } from './getShopifyInfo'
+import { ShopifyInfo, checkAppEmbed } from './getShopifyInfo'
 import '@/assets/main.css'
-
-import { Config } from './apis.d'
+import { RadioGroup } from '@/components'
 import Panel from '@/components/Panel.tsx'
 import { pcopy } from '@/utils/utils.ts'
 import { setIsFit, setLocalFit } from '@/entrypoints/content/apis.ts'
 import { Fitter } from '@/entrypoints/content/fitters.ts'
+import { AppTypeEnum } from './constants'
 
 interface AppInfoPanelProps {
   shopifyInfo: ShopifyInfo
-  userConfig: Config
   userFitter: Fitter
   themeName: string
+  isEnable: boolean
+  isLocalFit: boolean
+  isFit: boolean
+  currentApp: string
+  onCurrentAppChange: (v: string) => void
 }
 const AppInfoPanel = (props: AppInfoPanelProps) => {
-  const { shopifyInfo, userConfig, userFitter, themeName } = props
+  const {
+    shopifyInfo,
+    userFitter,
+    themeName,
+    currentApp,
+    isEnable,
+    isLocalFit,
+    isFit,
+    onCurrentAppChange,
+  } = props
   const [isPanelShow, setIsPanelShow] = useState(true)
+
+  const isEmbed = useMemo(() => {
+    return checkAppEmbed()
+  }, [])
 
   return (
     <Panel
@@ -24,7 +41,26 @@ const AppInfoPanel = (props: AppInfoPanelProps) => {
         setIsPanelShow(false)
       }}
     >
-      <div className={'mb-4 text-base font-semibold'}>
+      <div className="mb-4">
+        <RadioGroup
+          options={[
+            {
+              label: 'PP',
+              value: AppTypeEnum.PP,
+            },
+            {
+              label: 'CA',
+              value: AppTypeEnum.Captain,
+            },
+          ]}
+          value={currentApp}
+          onChange={function (v: any): void {
+            onCurrentAppChange(v)
+          }}
+          label={'App'}
+        ></RadioGroup>
+      </div>
+      <div className={'mb-2 text-base font-semibold'}>
         {userFitter.type === 1 ? 'Option one' : 'Option two'}
         {userFitter.type === 1 && userFitter.isRefreshCartPage
           ? ' (Refresh cart page)'
@@ -53,60 +89,71 @@ const AppInfoPanel = (props: AppInfoPanelProps) => {
           {themeName}
         </strong>
       </div>
+
       <div>
         IsInstalledPlugin:{' '}
-        <strong>{shopifyInfo.isInstalledInsurance ? 'YES' : 'NO'}</strong>
+        <strong
+          style={{
+            color: isEmbed ? 'green' : 'red',
+          }}
+        >
+          {isEmbed ? 'YES' : 'NO'}
+        </strong>
       </div>
       <div>
         IsEnable:{' '}
         <strong
           style={{
-            color: userConfig?.isEnable ? 'green' : 'red',
+            color: isEnable ? 'green' : 'red',
           }}
         >
-          {userConfig?.isEnable ? 'YES' : 'NO'}
+          {isEnable ? 'YES' : 'NO'}
         </strong>
       </div>
-      <div className="flex items-center gap-1">
-        IsLocalFit:{' '}
-        <input
-          type="checkbox"
-          checked={userConfig.isLocalFit}
-          onClick={async (e) => {
-            e.stopPropagation()
-            e.preventDefault()
-            const res = await setLocalFit({
-              storeName: shopifyInfo.shop,
-              isLocalFit: !userConfig.isLocalFit,
-            })
+      {currentApp === 'P' && (
+        <>
+          <div className="flex items-center gap-1">
+            IsLocalFit:{' '}
+            <input
+              type="checkbox"
+              checked={isLocalFit}
+              onClick={async (e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                const res = await setLocalFit({
+                  storeName: shopifyInfo.shop,
+                  isLocalFit: !isLocalFit,
+                })
 
-            if (res) {
-              window.location.reload()
-            }
-          }}
-          className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-        />
-      </div>
-      <div className="flex items-center gap-1">
-        IsFit:{' '}
-        <input
-          type="checkbox"
-          disabled={userConfig.isFit === 2}
-          checked={userConfig.isFit === 2}
-          onClick={async (e) => {
-            e.stopPropagation()
-            e.preventDefault()
-            const res = await setIsFit({
-              storeName: shopifyInfo.shop,
-              isFit: true,
-            })
-            if (res) {
-              window.location.reload()
-            }
-          }}
-          className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-        />
-      </div>
+                if (res) {
+                  window.location.reload()
+                }
+              }}
+              className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+          </div>
+          <div className="flex items-center gap-1">
+            IsFit:{' '}
+            <input
+              type="checkbox"
+              disabled={isFit}
+              checked={isFit}
+              onClick={async (e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                const res = await setIsFit({
+                  storeName: shopifyInfo.shop,
+                  isFit: true,
+                })
+                if (res) {
+                  window.location.reload()
+                }
+              }}
+              className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+          </div>
+        </>
+      )}
     </Panel>
   )
 }

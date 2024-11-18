@@ -2,6 +2,7 @@ import { useLayoutEffect } from 'react'
 import { ShopifyInfo, getShopifyInfo } from './getShopifyInfo'
 import { Toast } from '@/components'
 import '@/assets/main.css'
+import { storage } from '@wxt-dev/storage'
 
 import {
   Fitter,
@@ -13,6 +14,7 @@ import { Config, FittersData } from '@/entrypoints/content/apis.d'
 import AppSubmitModal from './AppSubmitModal'
 import AppInfoPanel from './AppInfoPanel'
 import AppCollector, { useSelectorRender } from './AppCollector'
+import { AppTypeEnum } from './constants'
 const App = () => {
   const [userConfig, setUserConfig] = useState<Config | null>(null)
 
@@ -41,15 +43,23 @@ const App = () => {
     theme_name: '',
   })
 
+  const [currentApp, setCurrentApp] = useState<AppTypeEnum>(AppTypeEnum.PP)
+
   useLayoutEffect(() => {
     window.document.body.dataset.insurancePlugin = 'PENDING'
     browser.runtime
       .sendMessage({
         action: 'app:init',
       })
-      .then((res) => {
+      .then(async (res) => {
         if (res === 'ON') {
           window.document.body.dataset.insurancePlugin = 'ON'
+          const currentApp =
+            (await storage.getItem<AppTypeEnum>('local:currentApp')) ??
+            AppTypeEnum.PP
+          window.__CurrentApp = currentApp
+          setCurrentApp(currentApp)
+
           init()
         } else {
           window.document.body.dataset.insurancePlugin = 'OFF'
@@ -108,10 +118,19 @@ const App = () => {
       }}
     >
       <AppInfoPanel
+        currentApp={currentApp}
+        onCurrentAppChange={(val: any) => {
+          window.__CurrentApp = val
+          storage.setItem('local:currentApp', val)
+
+          setCurrentApp(val)
+        }}
         shopifyInfo={shopifyInfo}
-        userConfig={userConfig}
         userFitter={userFitter}
         themeName={fitterRes.theme_name}
+        isEnable={userConfig.isEnable}
+        isLocalFit={userConfig.isLocalFit}
+        isFit={userConfig.isFit === 2}
       />
 
       {isFitting && (
