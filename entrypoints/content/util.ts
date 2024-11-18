@@ -105,3 +105,19 @@ export function getLimitedSelector(selector: string) {
   }
   return selector
 }
+
+// 接管fetch，统一处理错误
+export async function fetchWrap<T = any>(fetchResult: Promise<Response>) {
+  try {
+    const data = await fetchResult
+    return data.json() as unknown as T
+  } catch (error) {
+    console.log(`seel:fetch ${error}`)
+    return null
+  }
+}
+
+export function checkedScriptKeywords(keyword: string) {
+  const scripts = [...document.querySelectorAll('script')]
+  return scripts.some((item) => item.src.includes(keyword))
+}

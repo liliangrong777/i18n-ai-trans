@@ -37,10 +37,3 @@ export function getShopifyInfo() {
   info.themeId = info.theme?.id ?? ''
   return info
 }
-
-export function checkAppEmbed() {
-  const scripts = [...document.querySelectorAll('script')]
-  const keyword =
-    window.__CurrentApp === 'P' ? 'ins-theme-app' : 'ins-theme-app'
-  return scripts.some((item) => item.src.includes(keyword))
-}

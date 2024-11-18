@@ -5,8 +5,8 @@ import { Fitter, TypeEnum } from './fitters.ts'
 
 import { checkIsCartPage } from './util.ts'
 import { ShopifyInfo } from './getShopifyInfo.ts'
-import { setThemeConfig } from './apis.ts'
 import classNames from 'classnames'
+import { polyfill } from './polyfill.ts'
 interface AppSubmitModalProps {
   shopifyInfo: ShopifyInfo
   userFitter: Fitter
@@ -104,7 +104,7 @@ const AppSubmitModal = (props: AppSubmitModalProps) => {
   const submitToServer = async () => {
     setShowModal(false)
     // console.log('tijiao')
-    const res = await setThemeConfig({
+    const res = await polyfill.submit({
       ...userFitter,
       storeName: shopifyInfo.shop,
       themeId: shopifyInfo.themeId,

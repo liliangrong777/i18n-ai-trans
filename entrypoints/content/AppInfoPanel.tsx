@@ -1,4 +1,4 @@
-import { ShopifyInfo, checkAppEmbed } from './getShopifyInfo'
+import { ShopifyInfo } from './getShopifyInfo'
 import '@/assets/main.css'
 import { RadioGroup } from '@/components'
 import Panel from '@/components/Panel.tsx'
@@ -6,6 +6,7 @@ import { pcopy } from '@/utils/utils.ts'
 import { setIsFit, setLocalFit } from '@/entrypoints/content/apis.ts'
 import { Fitter } from '@/entrypoints/content/fitters.ts'
 import { AppTypeEnum } from './constants'
+import { polyfill } from './polyfill'
 
 interface AppInfoPanelProps {
   shopifyInfo: ShopifyInfo
@@ -31,7 +32,7 @@ const AppInfoPanel = (props: AppInfoPanelProps) => {
   const [isPanelShow, setIsPanelShow] = useState(true)
 
   const isEmbed = useMemo(() => {
-    return checkAppEmbed()
+    return polyfill.isEmbed()
   }, [])
 
   return (
