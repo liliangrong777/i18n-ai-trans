@@ -119,11 +119,10 @@ const App = () => {
     >
       <AppInfoPanel
         currentApp={currentApp}
-        onCurrentAppChange={(val: any) => {
+        onCurrentAppChange={async (val: any) => {
           window.__CurrentApp = val
-          storage.setItem('local:currentApp', val)
-
-          setCurrentApp(val)
+          await storage.setItem('local:currentApp', val)
+          window.location.reload()
         }}
         shopifyInfo={shopifyInfo}
         userFitter={userFitter}

@@ -57,7 +57,7 @@ const AppInfoPanel = (props: AppInfoPanelProps) => {
           onChange={function (v: any): void {
             onCurrentAppChange(v)
           }}
-          label={'App'}
+          label={''}
         ></RadioGroup>
       </div>
       <div className={'mb-2 text-base font-semibold'}>
