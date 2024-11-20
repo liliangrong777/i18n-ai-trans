@@ -15,6 +15,7 @@ import AppSubmitModal from './AppSubmitModal'
 import AppInfoPanel from './AppInfoPanel'
 import AppCollector, { useSelectorRender } from './AppCollector'
 import { AppTypeEnum } from './constants'
+import { checkedScriptKeywords } from './util'
 const App = () => {
   const [userConfig, setUserConfig] = useState<Config | null>(null)
 
@@ -54,9 +55,12 @@ const App = () => {
       .then(async (res) => {
         if (res === 'ON') {
           window.document.body.dataset.insurancePlugin = 'ON'
-          const currentApp =
-            (await storage.getItem<AppTypeEnum>('local:currentApp')) ??
-            AppTypeEnum.PP
+          const isPPWidget = checkedScriptKeywords('ins-theme-app')
+          const defaultApp = isPPWidget ? AppTypeEnum.PP : AppTypeEnum.Captain
+          const storageApp: any =
+            window.sessionStorage.getItem('ins:currentApp')
+          const currentApp = storageApp ?? defaultApp
+
           window.__CurrentApp = currentApp
           setCurrentApp(currentApp)
 
@@ -121,7 +125,7 @@ const App = () => {
         currentApp={currentApp}
         onCurrentAppChange={async (val: any) => {
           window.__CurrentApp = val
-          await storage.setItem('local:currentApp', val)
+          window.sessionStorage.setItem('ins:currentApp', val)
           window.location.reload()
         }}
         shopifyInfo={shopifyInfo}

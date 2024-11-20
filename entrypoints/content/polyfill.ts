@@ -37,4 +37,8 @@ const polyfillStrategy: Record<AppTypeEnum, PolyfillApi> = {
   },
 }
 
-export const polyfill = polyfillStrategy[window.__CurrentApp]
+export const polyfill = new Proxy(polyfillStrategy, {
+  get(target, p) {
+    return target[window.__CurrentApp][p]
+  },
+}) as unknown as PolyfillApi
