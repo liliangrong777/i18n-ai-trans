@@ -88,6 +88,7 @@ const App = () => {
     const queryString = new URLSearchParams({
       themeId: shopify.themeId,
       storeName: shopify.shop,
+      themeName:shopify.themeName
     }).toString()
 
     const [resConfig, resThemeInfo] = await Promise.all([
