@@ -108,6 +108,7 @@ const AppSubmitModal = (props: AppSubmitModalProps) => {
       ...userFitter,
       storeName: shopifyInfo.shop,
       themeId: shopifyInfo.themeId,
+      themeName: shopifyInfo.themeName,
     })
     if (res && res.code === 200) {
       window.__showToast('Submit Success!')
