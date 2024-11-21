@@ -18,34 +18,35 @@ export default defineBackground(() => {
   // 拦截购物车change事件，将sections字段添加到storage中（主要是通信不好使）
   browser.webRequest.onBeforeRequest.addListener(
     (details) => {
-      if (!details.url.includes('/cart/change')) return
-      if (details.method === 'POST') {
-        console.log(details.url, details.url.includes('/cart/change'))
+      if (details.url.includes('/cart/change')) {
+        if (details.method === 'POST') {
+          console.log(details.url, details.url.includes('/cart/change'))
 
-        const requestData = details.requestBody
-        if (requestData?.raw) {
-          const decoder = new TextDecoder('utf-8')
-          try {
-            const body = decoder.decode(requestData.raw[0].bytes)
-            let sections = JSON.parse(body)?.sections ?? ''
-            if (Array.isArray(sections)) {
-              sections = sections.filter((item) => item).join(',')
+          const requestData = details.requestBody
+          if (requestData?.raw) {
+            const decoder = new TextDecoder('utf-8')
+            try {
+              const body = decoder.decode(requestData.raw[0].bytes)
+              let sections = JSON.parse(body)?.sections ?? ''
+              if (Array.isArray(sections)) {
+                sections = sections.filter((item) => item).join(',')
+              }
+              if (typeof sections === 'string') {
+                sections = sections.replace(/\d+/g, '{{id}}')
+              }
+              browser.tabs
+                .query({ active: true, currentWindow: true })
+                .then((tabs) => {
+                  if (tabs[0].id) {
+                    browser.tabs.sendMessage(tabs[0].id, {
+                      action: 'change:section',
+                      data: sections,
+                    })
+                  }
+                })
+            } catch (error) {
+              console.log(error)
             }
-            if (typeof sections === 'string') {
-              sections = sections.replace(/\d+/g, '{{id}}')
-            }
-            browser.tabs
-              .query({ active: true, currentWindow: true })
-              .then((tabs) => {
-                if (tabs[0].id) {
-                  browser.tabs.sendMessage(tabs[0].id, {
-                    action: 'change:section',
-                    data: sections,
-                  })
-                }
-              })
-          } catch (error) {
-            console.log(error)
           }
         }
       }

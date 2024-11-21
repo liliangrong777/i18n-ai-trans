@@ -3,15 +3,18 @@ import {
   setThemeConfig,
   getThemeFitInfo,
   getCaptainThemeFitInfo,
+  setLocalFit,
 } from './apis'
-import { AppTypeEnum } from './constants'
+import { AppTypeEnum, FitStatusEnum } from './constants'
 import { TypeEnum } from './fitters'
+import { getShopifyInfo } from './getShopifyInfo'
 import { checkedScriptKeywords } from './util'
 
 interface PolyfillApi {
   submit: typeof setThemeConfig
   getFitter: typeof getThemeFitInfo
   isEmbed: () => boolean
+  beforeChangeStatus: (status: FitStatusEnum,oldStatus?:FitStatusEnum) => Promise<any>
 }
 
 const polyfillStrategy: Record<AppTypeEnum, PolyfillApi> = {
@@ -24,6 +27,13 @@ const polyfillStrategy: Record<AppTypeEnum, PolyfillApi> = {
     },
     getFitter: getThemeFitInfo,
     isEmbed: () => checkedScriptKeywords('ins-theme-app'),
+    beforeChangeStatus: async (status: FitStatusEnum) => {
+      const isLocalFit = status === FitStatusEnum.checking
+      await setLocalFit({
+        storeName: getShopifyInfo().shop,
+        isLocalFit: isLocalFit,
+      })
+    },
   },
   [AppTypeEnum.Captain]: {
     async submit(params) {
@@ -34,6 +44,7 @@ const polyfillStrategy: Record<AppTypeEnum, PolyfillApi> = {
     },
     getFitter: getCaptainThemeFitInfo,
     isEmbed: () => checkedScriptKeywords('captain'),
+    beforeChangeStatus: async () => {},
   },
 }
 

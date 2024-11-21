@@ -14,8 +14,9 @@ import { Config, FittersData } from '@/entrypoints/content/apis.d'
 import AppSubmitModal from './AppSubmitModal'
 import AppInfoPanel from './AppInfoPanel'
 import AppCollector, { useSelectorRender } from './AppCollector'
-import { AppTypeEnum } from './constants'
+import { AppTypeEnum, FitStatusEnum } from './constants'
 import { checkedScriptKeywords } from './util'
+import { polyfill } from './polyfill'
 const App = () => {
   const [userConfig, setUserConfig] = useState<Config | null>(null)
 
@@ -45,6 +46,7 @@ const App = () => {
   })
 
   const [currentApp, setCurrentApp] = useState<AppTypeEnum>(AppTypeEnum.PP)
+  const [status, setStatus] = useState<FitStatusEnum>(FitStatusEnum.fitting)
 
   useLayoutEffect(() => {
     window.document.body.dataset.insurancePlugin = 'PENDING'
@@ -101,17 +103,31 @@ const App = () => {
       ...resThemeInfo.data.theme,
       ...resThemeInfo.data.user,
     })
-    if (resConfig.data.isFit !== 2 && resConfig.data.isLocalFit) {
-      // TODO: 插入测试脚本
+    const { isFit, isLocalFit } = resConfig.data
+
+    const storageStatus = window.sessionStorage.getItem('ins:status')
+
+    if (storageStatus) {
+      setStatus(+storageStatus)
+      return
     }
+    if (isLocalFit) {
+      setStatus(FitStatusEnum.checking)
+      return
+    }
+    if (isFit === 2) {
+      setStatus(FitStatusEnum.published)
+      return
+    }
+    setStatus(FitStatusEnum.fitting)
   }
 
   // 是否适配中
-  const isFitting = userConfig && !userConfig.isLocalFit
+  const isFitting = status === FitStatusEnum.fitting
 
   useSelectorRender({
     userFitter,
-    isShow: !!isFitting,
+    isShow: isFitting,
   })
 
   if (!shopifyInfo || !userConfig) return null
@@ -134,6 +150,12 @@ const App = () => {
         isEnable={userConfig.isEnable}
         isLocalFit={userConfig.isLocalFit}
         isFit={userConfig.isFit === 2}
+        status={status}
+        onStatusChange={async (val) => {
+          await polyfill.beforeChangeStatus(val)
+          window.sessionStorage.setItem('ins:status', val + '')
+          window.location.reload()
+        }}
       />
 
       {isFitting && (

@@ -4,3 +4,9 @@ export enum AppTypeEnum {
   PP = 'P',
   Captain = 'C',
 }
+
+export enum FitStatusEnum {
+  fitting,
+  checking,
+  published,
+}

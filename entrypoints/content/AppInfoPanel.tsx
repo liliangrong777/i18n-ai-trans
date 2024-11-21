@@ -5,7 +5,7 @@ import Panel from '@/components/Panel.tsx'
 import { pcopy } from '@/utils/utils.ts'
 import { setIsFit, setLocalFit } from '@/entrypoints/content/apis.ts'
 import { Fitter } from '@/entrypoints/content/fitters.ts'
-import { AppTypeEnum } from './constants'
+import { AppTypeEnum, FitStatusEnum } from './constants'
 import { polyfill } from './polyfill'
 
 interface AppInfoPanelProps {
@@ -17,6 +17,8 @@ interface AppInfoPanelProps {
   isFit: boolean
   currentApp: string
   onCurrentAppChange: (v: string) => void
+  status: FitStatusEnum
+  onStatusChange: (val: FitStatusEnum) => void
 }
 const AppInfoPanel = (props: AppInfoPanelProps) => {
   const {
@@ -27,6 +29,8 @@ const AppInfoPanel = (props: AppInfoPanelProps) => {
     isEnable,
     isLocalFit,
     isFit,
+    status,
+    onStatusChange,
     onCurrentAppChange,
   } = props
   const [isPanelShow, setIsPanelShow] = useState(true)
@@ -59,7 +63,29 @@ const AppInfoPanel = (props: AppInfoPanelProps) => {
             onCurrentAppChange(v)
           }}
           label={''}
-        ></RadioGroup>
+        />
+
+        <RadioGroup
+          options={[
+            {
+              label: 'fitting',
+              value: FitStatusEnum.fitting,
+            },
+            {
+              label: 'checking',
+              value: FitStatusEnum.checking,
+            },
+            {
+              label: 'published',
+              value: FitStatusEnum.published,
+            },
+          ]}
+          value={status}
+          onChange={function (v: any): void {
+            onStatusChange(v)
+          }}
+          label={''}
+        />
       </div>
       <div className={'mb-2 text-base font-semibold'}>
         {userFitter.type === 1 ? 'Option one' : 'Option two'}
