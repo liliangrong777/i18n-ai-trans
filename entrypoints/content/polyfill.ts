@@ -4,6 +4,7 @@ import {
   getThemeFitInfo,
   getCaptainThemeFitInfo,
   setLocalFit,
+  setIsFit,
 } from './apis'
 import { AppTypeEnum, FitStatusEnum } from './constants'
 import { TypeEnum } from './fitters'
@@ -14,7 +15,11 @@ interface PolyfillApi {
   submit: typeof setThemeConfig
   getFitter: typeof getThemeFitInfo
   isEmbed: () => boolean
-  beforeChangeStatus: (status: FitStatusEnum,oldStatus?:FitStatusEnum) => Promise<any>
+  beforeChangeStatus: (
+    status: FitStatusEnum,
+    oldStatus?: FitStatusEnum,
+    ctx?: any
+  ) => Promise<any>
 }
 
 const polyfillStrategy: Record<AppTypeEnum, PolyfillApi> = {
@@ -27,12 +32,34 @@ const polyfillStrategy: Record<AppTypeEnum, PolyfillApi> = {
     },
     getFitter: getThemeFitInfo,
     isEmbed: () => checkedScriptKeywords('ins-theme-app'),
-    beforeChangeStatus: async (status: FitStatusEnum) => {
-      const isLocalFit = status === FitStatusEnum.checking
-      await setLocalFit({
-        storeName: getShopifyInfo().shop,
-        isLocalFit: isLocalFit,
-      })
+    beforeChangeStatus: async (status, oldStatus, ctx) => {
+      const shop = getShopifyInfo().shop
+      const arr: Promise<any>[] = []
+
+      // 处理checking变化逻辑
+      if (
+        oldStatus === FitStatusEnum.checking ||
+        status === FitStatusEnum.checking
+      ) {
+        arr.push(
+          setLocalFit({
+            storeName: shop,
+            isLocalFit: status === FitStatusEnum.checking,
+          })
+        )
+      }
+
+      // 只有首次适配的时候会调用setIsFit接口
+      if (status === FitStatusEnum.published && !ctx.isFit) {
+        arr.push(
+          setIsFit({
+            storeName: shop,
+            isFit: true,
+          })
+        )
+      }
+
+      await Promise.all(arr)
     },
   },
   [AppTypeEnum.Captain]: {

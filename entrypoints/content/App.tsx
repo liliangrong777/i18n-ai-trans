@@ -88,7 +88,7 @@ const App = () => {
     const queryString = new URLSearchParams({
       themeId: shopify.themeId,
       storeName: shopify.shop,
-      themeName:shopify.themeName
+      themeName: shopify.themeName,
     }).toString()
 
     const [resConfig, resThemeInfo] = await Promise.all([
@@ -149,11 +149,12 @@ const App = () => {
         userFitter={userFitter}
         themeName={fitterRes.theme_name}
         isEnable={userConfig.isEnable}
-        isLocalFit={userConfig.isLocalFit}
-        isFit={userConfig.isFit === 2}
         status={status}
         onStatusChange={async (val) => {
-          await polyfill.beforeChangeStatus(val)
+          if (status === val) return
+          await polyfill.beforeChangeStatus(val, status, {
+            isFit: userConfig.isFit === 2,
+          })
           window.sessionStorage.setItem('ins:status', val + '')
           window.location.reload()
         }}
