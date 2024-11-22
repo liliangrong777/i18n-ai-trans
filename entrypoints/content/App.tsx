@@ -8,8 +8,6 @@ import {
   TypeEnum,
   globalFitter,
 } from '@/entrypoints/content/fitters.ts'
-import { getThemeFitInfo, getUserConfig } from '@/entrypoints/content/apis.ts'
-import { Config, FittersData } from '@/entrypoints/content/apis.d'
 import AppSubmitModal from './AppSubmitModal'
 import AppInfoPanel from './AppInfoPanel'
 import AppCollector, { useSelectorRender } from './AppCollector'
@@ -25,8 +23,6 @@ import {
 import { checkedScriptKeywords } from './util'
 import { polyfill } from './polyfill'
 const App = () => {
-  const [userConfig, setUserConfig] = useState<Config | null>(null)
-
   const [shopifyInfo, setShopifyInfo] = useState<ShopifyInfo | null>(null)
   const [userFitter, setUserFitter] = useState<Fitter>({
     type: TypeEnum['PartialRender'],
@@ -46,11 +42,9 @@ const App = () => {
     isPrevent: true,
     dynamicSection: '',
   })
-  const [fitterRes, setFitterRes] = useState<FittersData>({
-    user: undefined,
-    theme: undefined,
-    theme_name: '',
-  })
+
+  const [isEnable, setIsEnable] = useState(false)
+  const [isFit, setIsFit] = useState(false)
 
   const [currentApp, setCurrentApp] = useState<AppTypeEnum>(AppTypeEnum.PP)
   const [status, setStatus] = useState<FitStatusEnum>(FitStatusEnum.fitting)
@@ -111,36 +105,20 @@ const App = () => {
       themeName: shopify.themeName,
     }).toString()
 
-    const [resConfig, resThemeInfo] = await Promise.all([
-      getUserConfig(shopify.shop),
-      getThemeFitInfo(queryString),
+    const [userInfo, resThemeInfo] = await Promise.all([
+      polyfill.getInfo(shopify.shop),
+      polyfill.getFitter(queryString),
     ])
-    if (!resConfig || !resThemeInfo) return
-    if (resConfig.code !== 200 || resThemeInfo.code !== 200) return
-    setUserConfig(resConfig.data)
-    setFitterRes(resThemeInfo.data)
+    if (!userInfo || !resThemeInfo || resThemeInfo.code !== 200) return
+    const { isEnable, isFit = false, status } = userInfo
+    setIsEnable(isEnable)
+    setIsFit(isFit)
     setUserFitter({
       ...globalFitter,
       ...resThemeInfo.data.theme,
       ...resThemeInfo.data.user,
     })
-    const { isFit, isLocalFit } = resConfig.data
-
-    const storageStatus = window.sessionStorage.getItem(StorageKey.status)
-
-    if (storageStatus) {
-      setStatus(+storageStatus)
-      return
-    }
-    if (isLocalFit) {
-      setStatus(FitStatusEnum.checking)
-      return
-    }
-    if (isFit === 2) {
-      setStatus(FitStatusEnum.published)
-      return
-    }
-    setStatus(FitStatusEnum.fitting)
+    setStatus(status)
   }
 
   // 是否适配中
@@ -163,13 +141,13 @@ const App = () => {
         }}
         shopifyInfo={shopifyInfo}
         userFitter={userFitter}
-        themeName={fitterRes.theme_name}
-        isEnable={userConfig?.isEnable ?? false}
+        themeName={shopifyInfo.themeName}
+        isEnable={isEnable}
         status={status}
         onStatusChange={async (val) => {
           if (status === val) return
           await polyfill.beforeChangeStatus(val, status, {
-            isFit: userConfig?.isFit === 2,
+            isFit: isFit,
           })
           window.sessionStorage.setItem(StorageKey.status, val + '')
           window.location.reload()

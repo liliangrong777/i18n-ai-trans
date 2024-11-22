@@ -17,6 +17,17 @@ export function getUserConfig(storeName) {
     )
   )
 }
+export function getCaptainUserConfig(storeName) {
+  return fetchWrap<Result<any>>(
+    fetch(
+      `${import.meta.env.VITE_CAPTAIN_URL}/api/v1/getCartSettingByShopUrl?shop_url=${storeName}`,
+      {
+        headers: { 'content-type': 'application/json' },
+        method: 'get',
+      }
+    )
+  )
+}
 
 export function getThemeFitInfo(config) {
   return fetchWrap<Result<FittersData>>(

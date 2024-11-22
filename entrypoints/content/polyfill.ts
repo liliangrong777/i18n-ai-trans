@@ -5,8 +5,16 @@ import {
   getCaptainThemeFitInfo,
   setLocalFit,
   setIsFit,
+  getUserConfig,
+  getCaptainUserConfig,
 } from './apis'
-import { AppTypeEnum, CIKey, FitStatusEnum, PPKey } from './constants'
+import {
+  AppTypeEnum,
+  CIKey,
+  FitStatusEnum,
+  PPKey,
+  StorageKey,
+} from './constants'
 import { TypeEnum } from './fitters'
 import { getShopifyInfo } from './getShopifyInfo'
 import { checkedScriptKeywords } from './util'
@@ -20,6 +28,12 @@ interface PolyfillApi {
     oldStatus?: FitStatusEnum,
     ctx?: any
   ) => Promise<any>
+  getInfo: (shop: string) => Promise<{
+    isFit?: boolean
+    isEnable: boolean
+    isLocalFit?: boolean
+    status: FitStatusEnum
+  } | null>
 }
 
 const polyfillStrategy: Record<AppTypeEnum, PolyfillApi> = {
@@ -61,6 +75,26 @@ const polyfillStrategy: Record<AppTypeEnum, PolyfillApi> = {
 
       await Promise.all(arr)
     },
+    async getInfo(shop) {
+      const res = await getUserConfig(shop)
+
+      if (!res || res.code !== 200) return null
+      const { isEnable, isFit, isLocalFit } = res.data
+      const storageStatus = window.sessionStorage.getItem(StorageKey.status)
+
+      return {
+        isEnable,
+        isFit: isFit === 2,
+        isLocalFit,
+        status: storageStatus
+          ? +storageStatus
+          : isLocalFit
+            ? FitStatusEnum.checking
+            : isFit
+              ? FitStatusEnum.published
+              : FitStatusEnum.fitting,
+      }
+    },
   },
   [AppTypeEnum.Captain]: {
     async submit(params) {
@@ -72,6 +106,16 @@ const polyfillStrategy: Record<AppTypeEnum, PolyfillApi> = {
     getFitter: getCaptainThemeFitInfo,
     isEmbed: () => checkedScriptKeywords(CIKey),
     beforeChangeStatus: async () => {},
+    async getInfo(shop) {
+      const res = await getCaptainUserConfig(shop)
+
+      if (!res || res.code !== 200) return null
+      const storageStatus = window.sessionStorage.getItem(StorageKey.status)
+      return {
+        isEnable: res.data.tm_is_enable == 1,
+        status: storageStatus ? +storageStatus : FitStatusEnum.fitting,
+      }
+    },
   },
 }
 
