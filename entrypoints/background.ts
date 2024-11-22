@@ -1,16 +1,55 @@
+import { MsgEvent } from './content/constants'
+
+// 插入cf脚本
+function injectScriptFromUrl(url, scriptId) {
+  const support = document.head || document.documentElement
+
+  const script = document.createElement('script')
+  const timestamp = new Date().getTime()
+  const _url = url + '?ext=ins' + '&id=' + scriptId + '&ts=' + timestamp
+  script.setAttribute('src', _url)
+  script.setAttribute('type', 'module')
+  script.id = scriptId
+  script.setAttribute('extension', 'ins-dynamic')
+  script.setAttribute('ts', timestamp + '')
+  script.onload = () => {
+    script.remove()
+  }
+  try {
+    support.appendChild(script)
+  } catch (err) {
+    console.error(err, 'append')
+  }
+}
+
 export default defineBackground(() => {
   // 如果是shopify环境 添加一个S标记
-  browser.runtime.onMessage.addListener(async (msg) => {
+  browser.runtime.onMessage.addListener(async (msg, sender) => {
     const { action } = msg
-    if (action === 'app:init') {
+    if (action === MsgEvent.execInit) {
       const text = (await browser.action.getBadgeText({})) || 'ON'
       browser.action.setBadgeText({
         text: text,
       })
       return text
     }
+
+    // 当用户没打开app embed给他动态插入一个
+    if (action === MsgEvent.execScript && sender.tab?.id) {
+      browser.scripting.executeScript({
+        target: { tabId: sender.tab.id },
+        func: () => {
+          // 插入脚本
+          injectScriptFromUrl(
+            'https://insurance-test.pages.dev/ins-theme-app.js',
+            'ins-injected'
+          )
+        },
+      })
+    }
   })
 
+  // 点击图标，切换插件开关状态
   browser.action.onClicked.addListener(() => {
     changeState()
   })
@@ -39,7 +78,7 @@ export default defineBackground(() => {
                 .then((tabs) => {
                   if (tabs[0].id) {
                     browser.tabs.sendMessage(tabs[0].id, {
-                      action: 'change:section',
+                      action: MsgEvent.changeSection,
                       data: sections,
                     })
                   }
@@ -68,6 +107,6 @@ export async function changeState() {
 
   const tabs = await browser.tabs.query({ active: true, currentWindow: true })
   if (tabs[0].id) {
-    browser.tabs.sendMessage(tabs[0].id, { action: 'change:state' })
+    browser.tabs.sendMessage(tabs[0].id, { action: MsgEvent.toggleStatus })
   }
 }

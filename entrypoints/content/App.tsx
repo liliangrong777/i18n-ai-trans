@@ -2,7 +2,6 @@ import { useLayoutEffect } from 'react'
 import { ShopifyInfo, getShopifyInfo } from './getShopifyInfo'
 import { Toast } from '@/components'
 import '@/assets/main.css'
-import { storage } from '@wxt-dev/storage'
 
 import {
   Fitter,
@@ -14,7 +13,15 @@ import { Config, FittersData } from '@/entrypoints/content/apis.d'
 import AppSubmitModal from './AppSubmitModal'
 import AppInfoPanel from './AppInfoPanel'
 import AppCollector, { useSelectorRender } from './AppCollector'
-import { AppTypeEnum, FitStatusEnum } from './constants'
+import {
+  AppTypeEnum,
+  CIKey,
+  FitStatusEnum,
+  MsgEvent,
+  PPKey,
+  PluginInBodyStatus,
+  StorageKey,
+} from './constants'
 import { checkedScriptKeywords } from './util'
 import { polyfill } from './polyfill'
 const App = () => {
@@ -48,19 +55,25 @@ const App = () => {
   const [currentApp, setCurrentApp] = useState<AppTypeEnum>(AppTypeEnum.PP)
   const [status, setStatus] = useState<FitStatusEnum>(FitStatusEnum.fitting)
 
+  const [pluginStatus, setPluginStatus] = useState<PluginInBodyStatus>(
+    PluginInBodyStatus.pending
+  )
   useLayoutEffect(() => {
-    window.document.body.dataset.insurancePlugin = 'PENDING'
+    window.document.body.dataset.insurancePlugin = PluginInBodyStatus.pending
+    setPluginStatus(PluginInBodyStatus.pending)
     browser.runtime
       .sendMessage({
-        action: 'app:init',
+        action: MsgEvent.execInit,
       })
       .then(async (res) => {
         if (res === 'ON') {
-          window.document.body.dataset.insurancePlugin = 'ON'
-          const isPPWidget = checkedScriptKeywords('ins-theme-app')
-          const defaultApp = isPPWidget ? AppTypeEnum.PP : AppTypeEnum.Captain
-          const storageApp: any =
-            window.sessionStorage.getItem('ins:currentApp')
+          window.document.body.dataset.insurancePlugin = PluginInBodyStatus.on
+          setPluginStatus(PluginInBodyStatus.on)
+          const hasPPWidget = checkedScriptKeywords(PPKey)
+          const defaultApp = hasPPWidget ? AppTypeEnum.PP : AppTypeEnum.Captain
+          const storageApp: any = window.sessionStorage.getItem(
+            StorageKey.currentApp
+          )
           const currentApp = storageApp ?? defaultApp
 
           window.__CurrentApp = currentApp
@@ -68,13 +81,14 @@ const App = () => {
 
           init()
         } else {
-          window.document.body.dataset.insurancePlugin = 'OFF'
+          window.document.body.dataset.insurancePlugin = PluginInBodyStatus.off
+          setPluginStatus(PluginInBodyStatus.off)
         }
       })
 
     browser.runtime.onMessage.addListener(async (message) => {
       const { action } = message
-      if (action === 'change:state') {
+      if (action === MsgEvent.toggleStatus) {
         window.location.reload()
       }
     })
@@ -83,6 +97,12 @@ const App = () => {
   const init = async () => {
     const shopify = getShopifyInfo()
     if (!shopify.shop) return
+
+    if (!checkedScriptKeywords(PPKey) && !checkedScriptKeywords(CIKey)) {
+      browser.runtime.sendMessage({
+        action: MsgEvent.execScript,
+      })
+    }
     setShopifyInfo(shopify)
 
     const queryString = new URLSearchParams({
@@ -106,7 +126,7 @@ const App = () => {
     })
     const { isFit, isLocalFit } = resConfig.data
 
-    const storageStatus = window.sessionStorage.getItem('ins:status')
+    const storageStatus = window.sessionStorage.getItem(StorageKey.status)
 
     if (storageStatus) {
       setStatus(+storageStatus)
@@ -128,34 +148,30 @@ const App = () => {
 
   useSelectorRender({
     userFitter,
-    isShow: isFitting,
+    isShow: isFitting && pluginStatus === PluginInBodyStatus.on,
   })
 
-  if (!shopifyInfo || !userConfig) return null
+  if (!shopifyInfo || pluginStatus !== PluginInBodyStatus.on) return null
   return (
-    <div
-      style={{
-        all: 'initial',
-      }}
-    >
+    <div style={{ all: 'initial' }}>
       <AppInfoPanel
         currentApp={currentApp}
         onCurrentAppChange={async (val: any) => {
           window.__CurrentApp = val
-          window.sessionStorage.setItem('ins:currentApp', val)
+          window.sessionStorage.setItem(StorageKey.currentApp, val)
           window.location.reload()
         }}
         shopifyInfo={shopifyInfo}
         userFitter={userFitter}
         themeName={fitterRes.theme_name}
-        isEnable={userConfig.isEnable}
+        isEnable={userConfig?.isEnable ?? false}
         status={status}
         onStatusChange={async (val) => {
           if (status === val) return
           await polyfill.beforeChangeStatus(val, status, {
-            isFit: userConfig.isFit === 2,
+            isFit: userConfig?.isFit === 2,
           })
-          window.sessionStorage.setItem('ins:status', val + '')
+          window.sessionStorage.setItem(StorageKey.status, val + '')
           window.location.reload()
         }}
       />

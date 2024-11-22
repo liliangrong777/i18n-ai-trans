@@ -6,7 +6,7 @@ import {
   setLocalFit,
   setIsFit,
 } from './apis'
-import { AppTypeEnum, FitStatusEnum } from './constants'
+import { AppTypeEnum, CIKey, FitStatusEnum, PPKey } from './constants'
 import { TypeEnum } from './fitters'
 import { getShopifyInfo } from './getShopifyInfo'
 import { checkedScriptKeywords } from './util'
@@ -31,7 +31,7 @@ const polyfillStrategy: Record<AppTypeEnum, PolyfillApi> = {
       return await setThemeConfig(params)
     },
     getFitter: getThemeFitInfo,
-    isEmbed: () => checkedScriptKeywords('ins-theme-app'),
+    isEmbed: () => checkedScriptKeywords(PPKey),
     beforeChangeStatus: async (status, oldStatus, ctx) => {
       const shop = getShopifyInfo().shop
       const arr: Promise<any>[] = []
@@ -70,7 +70,7 @@ const polyfillStrategy: Record<AppTypeEnum, PolyfillApi> = {
       return await setCaptainThemeConfig(params)
     },
     getFitter: getCaptainThemeFitInfo,
-    isEmbed: () => checkedScriptKeywords('captain'),
+    isEmbed: () => checkedScriptKeywords(CIKey),
     beforeChangeStatus: async () => {},
   },
 }

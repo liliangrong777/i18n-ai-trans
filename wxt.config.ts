@@ -11,6 +11,7 @@ export default defineConfig({
       'webRequest',
       'webRequestBlocking',
       'declarativeNetRequest',
+      'scripting',
     ],
     host_permissions: ['*://*/*'],
     action: {

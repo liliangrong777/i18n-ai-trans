@@ -50,7 +50,7 @@ const AppInfoPanel = (props: AppInfoPanelProps) => {
               value: AppTypeEnum.PP,
             },
             {
-              label: 'CA',
+              label: 'CI',
               value: AppTypeEnum.Captain,
             },
           ]}
