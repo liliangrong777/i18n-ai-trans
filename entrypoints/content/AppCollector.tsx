@@ -8,6 +8,7 @@ import {
   Fitter,
   getMatchedGlobalSelector,
 } from '@/entrypoints/content/fitters.ts'
+import { MsgEvent } from './constants'
 
 function guessPage() {
   return checkIsCartPage() ? 'cart' : 'drawer'
@@ -48,7 +49,7 @@ const AppCollector = (props: AppCollectorProps) => {
   useEffect(() => {
     const fn = async (message) => {
       const { action, data } = message
-      if (action === 'change:section' && data) {
+      if (action === MsgEvent.changeSection && data) {
         setUserFitter({
           ...userFitter,
           [checkIsCartPage() ? 'sections' : 'dynamicSection']: data,

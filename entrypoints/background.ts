@@ -16,7 +16,7 @@ export default defineBackground(() => {
     if (action === MsgEvent.execScript && sender.tab?.id) {
       browser.scripting.executeScript({
         target: { tabId: sender.tab.id },
-        func: () => {
+        func: (url) => {
           // 插入cf脚本
           function injectScriptFromUrl(url, scriptId) {
             const support = document.head || document.documentElement
@@ -31,7 +31,7 @@ export default defineBackground(() => {
             script.setAttribute('extension', 'ins-dynamic')
             script.setAttribute('ts', timestamp + '')
             script.onload = () => {
-              script.remove()
+              // script.remove()
             }
             try {
               support.appendChild(script)
@@ -41,13 +41,13 @@ export default defineBackground(() => {
           }
 
           // 插入脚本
-          injectScriptFromUrl(
-            action.currentApp === AppTypeEnum.PP
-              ? import.meta.env.VITE_PP_JS
-              : import.meta.env.VITE_CAPTAIN_JS,
-            'ins-script'
-          )
+          injectScriptFromUrl(url, 'ins-script')
         },
+        args: [
+          msg.currentApp === AppTypeEnum.PP
+            ? import.meta.env.VITE_PP_JS
+            : import.meta.env.VITE_CAPTAIN_JS,
+        ],
       })
     }
   })
