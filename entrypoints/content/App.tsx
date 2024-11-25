@@ -95,6 +95,7 @@ const App = () => {
     if (!checkedScriptKeywords(PPKey) && !checkedScriptKeywords(CIKey)) {
       browser.runtime.sendMessage({
         action: MsgEvent.execScript,
+        currentApp: window.__CurrentApp,
       })
     }
     setShopifyInfo(shopify)

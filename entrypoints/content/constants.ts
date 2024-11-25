@@ -1,5 +1,5 @@
 export const colors = ['green', 'blue', 'red']
-export const CIKey = 'insurance-font-js'
+export const CIKey = 'captain-plug-in'
 export const PPKey = 'ins-theme-app'
 export enum AppTypeEnum {
   PP = 'P',

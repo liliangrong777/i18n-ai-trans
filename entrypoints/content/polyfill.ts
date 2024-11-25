@@ -109,10 +109,9 @@ const polyfillStrategy: Record<AppTypeEnum, PolyfillApi> = {
     async getInfo(shop) {
       const res = await getCaptainUserConfig(shop)
 
-      if (!res || res.code !== 200) return null
       const storageStatus = window.sessionStorage.getItem(StorageKey.status)
       return {
-        isEnable: res.data.tm_is_enable == 1,
+        isEnable: res?.data?.tm_is_enable == 1,
         status: storageStatus ? +storageStatus : FitStatusEnum.fitting,
       }
     },

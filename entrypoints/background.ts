@@ -1,26 +1,4 @@
-import { MsgEvent } from './content/constants'
-
-// 插入cf脚本
-function injectScriptFromUrl(url, scriptId) {
-  const support = document.head || document.documentElement
-
-  const script = document.createElement('script')
-  const timestamp = new Date().getTime()
-  const _url = url + '?ext=ins' + '&id=' + scriptId + '&ts=' + timestamp
-  script.setAttribute('src', _url)
-  script.setAttribute('type', 'module')
-  script.id = scriptId
-  script.setAttribute('extension', 'ins-dynamic')
-  script.setAttribute('ts', timestamp + '')
-  script.onload = () => {
-    script.remove()
-  }
-  try {
-    support.appendChild(script)
-  } catch (err) {
-    console.error(err, 'append')
-  }
-}
+import { AppTypeEnum, MsgEvent } from './content/constants'
 
 export default defineBackground(() => {
   // 如果是shopify环境 添加一个S标记
@@ -39,10 +17,35 @@ export default defineBackground(() => {
       browser.scripting.executeScript({
         target: { tabId: sender.tab.id },
         func: () => {
+          // 插入cf脚本
+          function injectScriptFromUrl(url, scriptId) {
+            const support = document.head || document.documentElement
+
+            const script = document.createElement('script')
+            const timestamp = new Date().getTime()
+            const _url =
+              url + '?ext=ins' + '&id=' + scriptId + '&ts=' + timestamp
+            script.setAttribute('src', _url)
+            script.setAttribute('type', 'module')
+            script.id = scriptId
+            script.setAttribute('extension', 'ins-dynamic')
+            script.setAttribute('ts', timestamp + '')
+            script.onload = () => {
+              script.remove()
+            }
+            try {
+              support.appendChild(script)
+            } catch (err) {
+              console.error(err, 'append')
+            }
+          }
+
           // 插入脚本
           injectScriptFromUrl(
-            'https://insurance-test.pages.dev/ins-theme-app.js',
-            'ins-injected'
+            action.currentApp === AppTypeEnum.PP
+              ? import.meta.env.VITE_PP_JS
+              : import.meta.env.VITE_CAPTAIN_JS,
+            'ins-script'
           )
         },
       })

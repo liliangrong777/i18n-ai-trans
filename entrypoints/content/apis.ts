@@ -1,9 +1,12 @@
 import { Result, FittersData, ThemeConfig, Config, LocalFit } from './apis.d'
 import { fetchWrap } from './util'
 
-const headers = {
-  'content-type': 'application/json',
-  'X-Plug-Token': '265159f3e2c7b90a1ce4b2993f04cb4b',
+const headers = () => {
+  const key = 'X-Plug-Token'
+  return {
+    'content-type': 'application/json',
+    [key]: '265159f3e2c7b90a1ce4b2993f04cb4b',
+  }
 }
 
 export function getUserConfig(storeName) {
@@ -49,7 +52,7 @@ export function getCaptainThemeFitInfo(config) {
 export function setThemeConfig(config: ThemeConfig) {
   return fetchWrap<Result<FittersData>>(
     fetch(`${import.meta.env.VITE_BASE_URL}/api/v1/setThemeConfig`, {
-      headers: headers,
+      headers: headers(),
       method: 'POST',
       body: JSON.stringify(config),
     })
@@ -59,7 +62,7 @@ export function setThemeConfig(config: ThemeConfig) {
 export function setCaptainThemeConfig(config: ThemeConfig) {
   return fetchWrap<Result<FittersData>>(
     fetch(`${import.meta.env.VITE_CAPTAIN_URL}/api/v1/setThemeConfig`, {
-      headers: headers,
+      headers: headers(),
       method: 'POST',
       body: JSON.stringify(config),
     })
@@ -69,7 +72,7 @@ export function setCaptainThemeConfig(config: ThemeConfig) {
 export function setLocalFit(config: LocalFit) {
   return fetchWrap<Result<FittersData>>(
     fetch(`${import.meta.env.VITE_BASE_URL}/api/v1/setLocalFit`, {
-      headers: headers,
+      headers: headers(),
       method: 'POST',
       body: JSON.stringify(config),
     })
@@ -79,7 +82,7 @@ export function setLocalFit(config: LocalFit) {
 export function setIsFit(config: { storeName: string; isFit: boolean }) {
   return fetchWrap<Result<FittersData>>(
     fetch(`${import.meta.env.VITE_BASE_URL}/api/v1/setIsFit`, {
-      headers: headers,
+      headers: headers(),
       method: 'POST',
       body: JSON.stringify(config),
     })
