@@ -3,11 +3,7 @@ import { ShopifyInfo, getShopifyInfo } from './getShopifyInfo'
 import { Toast } from '@/components'
 import '@/assets/main.css'
 
-import {
-  Fitter,
-  TypeEnum,
-  globalFitter,
-} from '@/entrypoints/content/fitters.ts'
+import { Fitter, TypeEnum } from '@/entrypoints/content/fitters.ts'
 import AppSubmitModal from './AppSubmitModal'
 import AppInfoPanel from './AppInfoPanel'
 import AppCollector, { useSelectorRender } from './AppCollector'
@@ -63,13 +59,14 @@ const App = () => {
         if (res === 'ON') {
           window.document.body.dataset.insurancePlugin = PluginInBodyStatus.on
           setPluginStatus(PluginInBodyStatus.on)
-          const hasPPWidget = checkedScriptKeywords(PPKey)
-          const defaultApp = hasPPWidget ? AppTypeEnum.PP : AppTypeEnum.Captain
           const storageApp: any = window.sessionStorage.getItem(
             StorageKey.currentApp
           )
-          const currentApp = storageApp ?? defaultApp
-
+          const currentApp = storageApp
+            ? storageApp
+            : checkedScriptKeywords(PPKey)
+              ? AppTypeEnum.PP
+              : AppTypeEnum.Captain
           window.__CurrentApp = currentApp
           setCurrentApp(currentApp)
 
@@ -114,10 +111,16 @@ const App = () => {
     const { isEnable, isFit = false, status } = userInfo
     setIsEnable(isEnable)
     setIsFit(isFit)
-    setUserFitter({
-      ...globalFitter,
-      ...resThemeInfo.data.theme,
-      ...resThemeInfo.data.user,
+    setUserFitter((val) => {
+      return {
+        ...val,
+        type:
+          window.__CurrentApp === AppTypeEnum.PP
+            ? TypeEnum.PartialRender
+            : TypeEnum.FakeUpdate,
+        ...resThemeInfo.data.theme,
+        ...resThemeInfo.data.user,
+      }
     })
     setStatus(status)
   }
@@ -136,7 +139,6 @@ const App = () => {
       <AppInfoPanel
         currentApp={currentApp}
         onCurrentAppChange={async (val: any) => {
-          window.__CurrentApp = val
           window.sessionStorage.setItem(StorageKey.currentApp, val)
           window.location.reload()
         }}
