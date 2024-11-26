@@ -68,7 +68,8 @@ const App = () => {
               ? AppTypeEnum.PP
               : AppTypeEnum.Captain
           window.__CurrentApp = currentApp
-          setCurrentApp(currentApp)
+          window.__CurrentApp = AppTypeEnum.Captain
+          setCurrentApp(window.__CurrentApp as any)
 
           init()
         } else {
