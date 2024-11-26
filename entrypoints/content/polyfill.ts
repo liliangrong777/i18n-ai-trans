@@ -112,7 +112,7 @@ const polyfillStrategy: Record<AppTypeEnum, PolyfillApi> = {
       const storageStatus = window.sessionStorage.getItem(StorageKey.status)
       return {
         isEnable: res?.data?.tm_is_enable == 1,
-        status: storageStatus ? +storageStatus : FitStatusEnum.fitting,
+        status: storageStatus ? +storageStatus : FitStatusEnum.published,
       }
     },
   },
