@@ -31,6 +31,12 @@ const AppCollector = (props: AppCollectorProps) => {
   useLayoutEffect(() => {
     const app = new AppCore({
       onSelect(v, e) {
+        const isShadowRoot = (e.target as any)?.shadowRoot
+        if (isShadowRoot) {
+          window.__showToast("shadowRoot can't be adapted", false)
+          return
+        }
+
         setPage(guessPage())
         setSelector(v)
         setPosition('beforebegin')
