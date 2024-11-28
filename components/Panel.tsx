@@ -8,7 +8,7 @@ const Panel = (props: PanelProps) => {
   return (
     <div
       id="modal"
-      className={`fixed left-0 top-36 z-[999992] items-center justify-center bg-black bg-opacity-50 text-xs ${
+      className={`fixed left-0 top-36 z-[9999999999999] items-center justify-center bg-black  text-xs ${
         open ? 'flex' : 'hidden'
       }`}
     >

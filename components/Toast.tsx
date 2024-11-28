@@ -18,7 +18,7 @@ export const Toast = () => {
     <div>
       {toastMessage && (
         <div
-          className={`fixed right-4 top-4 z-[999999] rounded p-4 shadow ${
+          className={`fixed right-4 top-4 z-[9999999999999] rounded p-4 shadow ${
             isSuccess ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
           }`}
         >

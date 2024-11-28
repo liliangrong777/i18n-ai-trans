@@ -100,7 +100,7 @@ const AppCollector = (props: AppCollectorProps) => {
         style={{
           top: 'calc(50% - 50px)',
         }}
-        className="fixed right-0 z-[99999999991] flex h-10 w-10 -translate-y-1/2 transform cursor-pointer items-center justify-center rounded-full bg-blue-600  p-4 text-white shadow-lg hover:opacity-80"
+        className="fixed right-0 z-[9999999999999] flex h-10 w-10 -translate-y-1/2 transform cursor-pointer items-center justify-center rounded-full bg-blue-600  p-4 text-white shadow-lg hover:opacity-80"
       >
         G
       </div>

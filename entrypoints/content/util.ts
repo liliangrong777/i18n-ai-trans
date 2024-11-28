@@ -14,12 +14,13 @@ export function addStyle(container) {
     -webkit-focus-ring-color auto 1px
     ) !important;
     opacity:0.9!important;
+    z-index:9999999999999;
 }
 captain-enhance-ui{
     all: initial;   
 }
 insurance-content-app{
-    z-index:99999999999;
+    z-index:9999999999999;
     position:relative;
     direction:ltr;
 }

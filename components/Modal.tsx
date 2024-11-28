@@ -27,7 +27,7 @@ export const Modal = (props: ModalProps) => {
     <div
       ref={ref}
       id="modal"
-      className={`fixed inset-0 z-[999992] items-center justify-center bg-black bg-opacity-50 ${
+      className={`fixed inset-0 z-[9999999999999] items-center justify-center bg-black bg-opacity-50 ${
         open ? 'flex' : 'hidden'
       }`}
     >
