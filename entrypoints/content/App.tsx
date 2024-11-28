@@ -37,6 +37,7 @@ const App = () => {
     dynamicSubmit: '',
     isPrevent: true,
     dynamicSection: '',
+    isPriceInSubmitText: false,
   })
 
   const [isEnable, setIsEnable] = useState(false)

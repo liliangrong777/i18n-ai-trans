@@ -81,6 +81,10 @@ const AppSubmitModal = (props: AppSubmitModalProps) => {
       key: 'isPrevent',
       label: 'isPrevent',
     },
+    {
+      key: 'isPriceInSubmitText',
+      label: 'isPriceInSubmitText',
+    },
   ]
 
   const isDelHideList = [
@@ -97,6 +101,7 @@ const AppSubmitModal = (props: AppSubmitModalProps) => {
     'isRefreshCartPage',
     'ppSeelCartTemplate',
     'isPrevent',
+    'isPriceInSubmitText',
   ]
 
   const list = [commonList, option1List, option2List]

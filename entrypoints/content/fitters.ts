@@ -41,6 +41,8 @@ export interface Fitter {
   dynamicSubmit: string
   // 是否阻止事件冒泡，主要用于方案2
   isPrevent: boolean
+  // 是否总价在submit按钮中
+  isPriceInSubmitText: boolean
 }
 
 const anchorSelectors = () =>
@@ -603,23 +605,4 @@ export function getMatchedGlobalSelector() {
       }) ?? ''
   })
   return res
-}
-
-export const globalFitter: Fitter = {
-  type: TypeEnum['PartialRender'],
-  anchor: '',
-  position: 'beforebegin',
-  dynamicAnchor: '',
-  dynamicPosition: 'beforebegin',
-  updateSection: '',
-  dynamicUpdateSection: '',
-  footerUpdateSection: '',
-  dynamicFooterUpdateSection: '',
-  isRefreshCartPage: false,
-  ppSeelCartTemplate: false,
-  sections: '',
-  submit: '',
-  dynamicSubmit: '',
-  isPrevent: true,
-  dynamicSection: '',
 }

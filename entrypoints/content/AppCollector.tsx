@@ -206,6 +206,18 @@ const AppCollector = (props: AppCollectorProps) => {
           >
             Add
           </Button>
+          <div>
+            <Button
+              onClick={async (e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                document.querySelector(selector)?.remove()
+                setOpen(false)
+              }}
+            >
+              Remove this mask
+            </Button>
+          </div>
         </div>
       </Modal>
     </>
