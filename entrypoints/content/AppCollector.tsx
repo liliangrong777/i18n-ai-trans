@@ -249,7 +249,7 @@ export function useSelectorRender(props: useSelectorRenderProps) {
         if (item) {
           styles.push(`
                 ${item}{
-                    border:3px solid green;
+                    border:3px solid green !important;
                 }
         `)
         }

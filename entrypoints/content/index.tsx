@@ -39,5 +39,13 @@ export default defineContentScript({
 
     // Call mount to add the UI to the DOM
     ui.mount()
+    setInterval(() => {
+      const node = document.querySelector('insurance-content-app')
+      if (node) {
+        if (node.parentNode?.lastElementChild !== node) {
+          node.parentNode?.appendChild(node)
+        }
+      }
+    }, 1000)
   },
 })
