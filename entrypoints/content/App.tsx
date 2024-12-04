@@ -89,6 +89,23 @@ const App = () => {
   const init = async () => {
     const shopify = getShopifyInfo()
     if (!shopify.shop) return
+    const userInfo = await polyfill.getInfo(shopify.shop)
+    if (userInfo && userInfo.status === FitStatusEnum.checking) {
+      // pp appEmbed没有打开时
+      if (window.__CurrentApp === 'P' && !checkedScriptKeywords(PPKey)) {
+        browser.runtime.sendMessage({
+          action: MsgEvent.execScript,
+          currentApp: window.__CurrentApp,
+        })
+      }
+      // ci appEmbed没有打开时
+      if (window.__CurrentApp === 'C' && !checkedScriptKeywords(CIKey)) {
+        browser.runtime.sendMessage({
+          action: MsgEvent.execScript,
+          currentApp: window.__CurrentApp,
+        })
+      }
+    }
 
     if (!checkedScriptKeywords(PPKey) && !checkedScriptKeywords(CIKey)) {
       browser.runtime.sendMessage({
@@ -104,10 +121,7 @@ const App = () => {
       themeName: shopify.themeName,
     }).toString()
 
-    const [userInfo, resThemeInfo] = await Promise.all([
-      polyfill.getInfo(shopify.shop),
-      polyfill.getFitter(queryString),
-    ])
+    const resThemeInfo = await polyfill.getFitter(queryString)
     if (!userInfo || !resThemeInfo || resThemeInfo.code !== 200) return
     const { isEnable, isFit = false, status } = userInfo
     setIsEnable(isEnable)
