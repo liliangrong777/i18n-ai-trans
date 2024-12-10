@@ -113,6 +113,7 @@ const App = () => {
       themeId: shopify.themeId,
       storeName: shopify.shop,
       themeName: shopify.themeName,
+      schemaVersion: shopify.themeVersion,
     }).toString()
 
     const resThemeInfo = await polyfill.getFitter(queryString)

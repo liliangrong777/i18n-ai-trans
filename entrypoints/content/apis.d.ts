@@ -17,6 +17,7 @@ export interface ThemeConfig extends Fitter {
   themeId: string
   storeName: string
   themeName: string
+  schemaVersion: string
 }
 
 export interface Quotes {

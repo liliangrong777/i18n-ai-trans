@@ -1,5 +1,6 @@
 export interface ShopifyInfo {
   themeName: string
+  themeVersion: string
   themeId: string
   shop: string
   locale: string
@@ -10,6 +11,7 @@ export interface ShopifyInfo {
 export function getShopifyInfo() {
   const info: ShopifyInfo = {
     themeName: '',
+    themeVersion: '',
     themeId: '',
     shop: '',
     locale: '',
@@ -38,8 +40,14 @@ export function getShopifyInfo() {
       if (match2) {
         info.themeName = match2[1]
       }
+      const match3 = content.match(/BOOMR.themeVersion\s*=\s*"(.+?)"/)
+      if (match3) {
+        info.themeVersion = match3[1]
+      }
     }
   }
   info.themeId = info.theme?.id ?? ''
+  info.themeName = info.theme?.schema_name || info.themeName
+  info.themeVersion = info.theme?.schema_version || info.themeVersion
   return info
 }
