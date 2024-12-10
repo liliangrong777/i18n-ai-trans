@@ -10,24 +10,24 @@ import { polyfill } from './polyfill'
 interface AppInfoPanelProps {
   shopifyInfo: ShopifyInfo
   userFitter: Fitter
-  themeName: string
   isEnable: boolean
   currentApp: string
   onCurrentAppChange: (v: string) => void
   status: FitStatusEnum
   onStatusChange: (val: FitStatusEnum) => void
+  onCheckedChange: (val: boolean) => void
 }
 const AppInfoPanel = (props: AppInfoPanelProps) => {
   const {
     shopifyInfo,
     userFitter,
-    themeName,
     currentApp,
     isEnable,
 
     status,
     onStatusChange,
     onCurrentAppChange,
+    onCheckedChange,
   } = props
   const [isPanelShow, setIsPanelShow] = useState(true)
 
@@ -106,10 +106,21 @@ const AppInfoPanel = (props: AppInfoPanelProps) => {
         <strong
           className={'cursor-copy'}
           onClick={() => {
-            pcopy(themeName)
+            pcopy(shopifyInfo.themeName)
           }}
         >
-          {themeName}
+          {shopifyInfo.themeName}
+        </strong>
+      </div>
+      <div>
+        Theme Version:
+        <strong
+          className={'cursor-copy'}
+          onClick={() => {
+            pcopy(shopifyInfo.themeVersion)
+          }}
+        >
+          {shopifyInfo.themeVersion}
         </strong>
       </div>
 
@@ -132,6 +143,22 @@ const AppInfoPanel = (props: AppInfoPanelProps) => {
         >
           {isEnable ? 'YES' : 'NO'}
         </strong>
+      </div>
+      <div>
+        Weight: <strong>{userFitter.weight}</strong>
+      </div>
+      <div className="flex items-center gap-2">
+        <span>isCheckedAndOk: </span>
+        <input
+          type="checkbox"
+          onChange={(e) => {
+            const checked = userFitter.weight >= 3
+            e.stopPropagation()
+            e.preventDefault()
+            onCheckedChange(!checked)
+          }}
+          checked={userFitter.weight >= 3}
+        ></input>
       </div>
     </Panel>
   )

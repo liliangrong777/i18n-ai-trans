@@ -38,6 +38,7 @@ const App = () => {
     isPrevent: true,
     dynamicSection: '',
     isPriceInSubmitText: false,
+    weight: 3,
   })
 
   const [isEnable, setIsEnable] = useState(false)
@@ -154,7 +155,6 @@ const App = () => {
         }}
         shopifyInfo={shopifyInfo}
         userFitter={userFitter}
-        themeName={shopifyInfo.themeName}
         isEnable={isEnable}
         status={status}
         onStatusChange={async (val) => {
@@ -164,6 +164,22 @@ const App = () => {
           })
           window.sessionStorage.setItem(StorageKey.status, val + '')
           window.location.reload()
+        }}
+        onCheckedChange={async (val) => {
+          const res = await polyfill.submit({
+            ...userFitter,
+            storeName: shopifyInfo.shop,
+            themeId: shopifyInfo.themeId,
+            themeName: shopifyInfo.themeName,
+            schemaVersion: shopifyInfo.themeVersion,
+            weight: val ? 3 : 0,
+          })
+          if (res && res.code === 200) {
+            window.__showToast('op Success!')
+            window.location.reload()
+          } else {
+            window.__showToast('op Error', false)
+          }
         }}
       />
 

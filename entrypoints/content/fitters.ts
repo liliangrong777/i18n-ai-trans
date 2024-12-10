@@ -43,6 +43,8 @@ export interface Fitter {
   isPrevent: boolean
   // 是否总价在submit按钮中
   isPriceInSubmitText: boolean
+  // 配置权重
+  weight: number
 }
 
 const anchorSelectors = () =>
