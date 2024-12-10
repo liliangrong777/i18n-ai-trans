@@ -115,6 +115,7 @@ const AppSubmitModal = (props: AppSubmitModalProps) => {
       themeId: shopifyInfo.themeId,
       themeName: shopifyInfo.themeName,
       schemaVersion: shopifyInfo.themeVersion,
+      weight: +weight,
     })
     if (res && res.code === 200) {
       window.__showToast('Submit Success!')
@@ -122,6 +123,8 @@ const AppSubmitModal = (props: AppSubmitModalProps) => {
       window.__showToast('err', false)
     }
   }
+
+  const [weight, setWeight] = useState('3')
 
   const color = userFitter[checkIsCartPage() ? 'sections' : 'dynamicSection']
     ? 'blue'
@@ -260,7 +263,18 @@ const AppSubmitModal = (props: AppSubmitModalProps) => {
             })}
           </div>
 
-          <Button onClick={submitToServer}>Submit</Button>
+          <div className="flex items-end gap-2">
+            <Input
+              value={weight + ''}
+              onChange={(val) => {
+                setWeight(val)
+              }}
+              label={''}
+            ></Input>
+            <div className="flex-1">
+              <Button onClick={submitToServer}>Submit</Button>
+            </div>
+          </div>
         </div>
       </Modal>
     </>

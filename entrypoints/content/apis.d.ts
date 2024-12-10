@@ -18,6 +18,7 @@ export interface ThemeConfig extends Fitter {
   storeName: string
   themeName: string
   schemaVersion: string
+  weight: number
 }
 
 export interface Quotes {
