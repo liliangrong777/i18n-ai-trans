@@ -189,6 +189,9 @@ const App = () => {
             userFitter={userFitter}
             setUserFitter={setUserFitter}
             shopifyInfo={shopifyInfo}
+            onSubmit={async (userFitter) => {
+              setUserFitter({ ...userFitter })
+            }}
           />
           <AppCollector userFitter={userFitter} setUserFitter={setUserFitter} />
         </>

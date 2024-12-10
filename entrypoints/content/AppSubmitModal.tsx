@@ -11,10 +11,11 @@ interface AppSubmitModalProps {
   shopifyInfo: ShopifyInfo
   userFitter: Fitter
   setUserFitter: React.Dispatch<React.SetStateAction<Fitter>>
+  onSubmit: (userFitter: Fitter) => Promise<any>
 }
 const AppSubmitModal = (props: AppSubmitModalProps) => {
   const [showModal, setShowModal] = useState(false)
-  const { userFitter, setUserFitter, shopifyInfo } = props
+  const { userFitter, setUserFitter, shopifyInfo, onSubmit } = props
 
   const commonList = [
     {
@@ -109,16 +110,20 @@ const AppSubmitModal = (props: AppSubmitModalProps) => {
   const submitToServer = async () => {
     setShowModal(false)
     // console.log('tijiao')
-    const res = await polyfill.submit({
+    const newUserFitter = {
       ...userFitter,
+      weight: +weight,
+    }
+    const res = await polyfill.submit({
+      ...newUserFitter,
       storeName: shopifyInfo.shop,
       themeId: shopifyInfo.themeId,
       themeName: shopifyInfo.themeName,
       schemaVersion: shopifyInfo.themeVersion,
-      weight: +weight,
     })
     if (res && res.code === 200) {
       window.__showToast('Submit Success!')
+      await onSubmit(newUserFitter)
     } else {
       window.__showToast('err', false)
     }
