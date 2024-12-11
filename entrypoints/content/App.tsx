@@ -46,7 +46,12 @@ const App = () => {
 
   const [currentApp, setCurrentApp] = useState<AppTypeEnum>(AppTypeEnum.PP)
   const [status, setStatus] = useState<FitStatusEnum>(FitStatusEnum.fitting)
-
+  // Error的场景
+  // CI 1.用户卸载了，2.没有虚拟商品（isEnable从未开启过）
+  // PPI 1. !曾经有审核通过的用户
+  const [initStatus, setInitStatus] = useState<'success' | 'loading' | 'error'>(
+    'loading'
+  )
   const [pluginStatus, setPluginStatus] = useState<PluginInBodyStatus>(
     PluginInBodyStatus.pending
   )
@@ -118,6 +123,7 @@ const App = () => {
     }).toString()
 
     const resThemeInfo = await polyfill.getFitter(queryString)
+    setInitStatus(userInfo && resThemeInfo?.code === 200 ? 'success' : 'error')
     if (!userInfo || !resThemeInfo || resThemeInfo.code !== 200) return
     const { isEnable, isFit = false, status } = userInfo
     setIsEnable(isEnable)
@@ -157,6 +163,7 @@ const App = () => {
         userFitter={userFitter}
         isEnable={isEnable}
         status={status}
+        initStatus={initStatus}
         onStatusChange={async (val) => {
           if (status === val) return
           await polyfill.beforeChangeStatus(val, status, {
@@ -183,7 +190,7 @@ const App = () => {
         }}
       />
 
-      {isFitting && (
+      {isFitting && initStatus === 'success' && (
         <>
           <AppSubmitModal
             userFitter={userFitter}

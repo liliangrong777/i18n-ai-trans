@@ -3,7 +3,7 @@ import '@/assets/main.css'
 import { RadioGroup } from '@/components'
 import Panel from '@/components/Panel.tsx'
 import { pcopy } from '@/utils/utils.ts'
-import { Fitter } from '@/entrypoints/content/fitters.ts'
+import { Fitter, TypeEnum } from '@/entrypoints/content/fitters.ts'
 import { AppTypeEnum, FitStatusEnum } from './constants'
 import { polyfill } from './polyfill'
 
@@ -14,6 +14,7 @@ interface AppInfoPanelProps {
   currentApp: string
   onCurrentAppChange: (v: string) => void
   status: FitStatusEnum
+  initStatus: 'loading' | 'success' | 'error'
   onStatusChange: (val: FitStatusEnum) => void
   onCheckedChange: (val: boolean) => void
 }
@@ -23,7 +24,7 @@ const AppInfoPanel = (props: AppInfoPanelProps) => {
     userFitter,
     currentApp,
     isEnable,
-
+    initStatus,
     status,
     onStatusChange,
     onCurrentAppChange,
@@ -34,6 +35,21 @@ const AppInfoPanel = (props: AppInfoPanelProps) => {
   const isEmbed = useMemo(() => {
     return polyfill.isEmbed()
   }, [])
+
+  const typeStr = useMemo(() => {
+    if (initStatus === 'loading') {
+      return 'Querying...'
+    }
+    if (initStatus === 'error') {
+      return 'Error'
+    }
+    if (userFitter.type === TypeEnum.FakeUpdate) {
+      return 'Option two'
+    }
+    return userFitter.isRefreshCartPage
+      ? 'Option one (Refresh cart page)'
+      : 'Option one'
+  }, [userFitter, initStatus])
 
   return (
     <Panel
@@ -61,34 +77,31 @@ const AppInfoPanel = (props: AppInfoPanelProps) => {
           label={''}
         />
 
-        <RadioGroup
-          options={[
-            {
-              label: 'fitting',
-              value: FitStatusEnum.fitting,
-            },
-            {
-              label: 'checking',
-              value: FitStatusEnum.checking,
-            },
-            {
-              label: 'published',
-              value: FitStatusEnum.published,
-            },
-          ]}
-          value={status}
-          onChange={function (v: any): void {
-            onStatusChange(v)
-          }}
-          label={''}
-        />
+        {initStatus === 'success' && (
+          <RadioGroup
+            options={[
+              {
+                label: 'fitting',
+                value: FitStatusEnum.fitting,
+              },
+              {
+                label: 'checking',
+                value: FitStatusEnum.checking,
+              },
+              {
+                label: 'published',
+                value: FitStatusEnum.published,
+              },
+            ]}
+            value={status}
+            onChange={function (v: any): void {
+              onStatusChange(v)
+            }}
+            label={''}
+          />
+        )}
       </div>
-      <div className={'mb-2 text-base font-semibold'}>
-        {userFitter.type === 1 ? 'Option one' : 'Option two'}
-        {userFitter.type === 1 && userFitter.isRefreshCartPage
-          ? ' (Refresh cart page)'
-          : ''}
-      </div>
+      <div className={'mb-2 text-base font-semibold'}>{typeStr}</div>
 
       <div>
         Shop:{' '}
@@ -134,32 +147,37 @@ const AppInfoPanel = (props: AppInfoPanelProps) => {
           {isEmbed ? 'YES' : 'NO'}
         </strong>
       </div>
-      <div>
-        IsEnable:{' '}
-        <strong
-          style={{
-            color: isEnable ? 'green' : 'red',
-          }}
-        >
-          {isEnable ? 'YES' : 'NO'}
-        </strong>
-      </div>
-      <div>
-        Weight: <strong>{userFitter.weight}</strong>
-      </div>
-      <div className="flex items-center gap-2">
-        <span>isCheckedAndOk: </span>
-        <input
-          type="checkbox"
-          onChange={(e) => {
-            const checked = userFitter.weight >= 3
-            e.stopPropagation()
-            e.preventDefault()
-            onCheckedChange(!checked)
-          }}
-          checked={userFitter.weight >= 3}
-        ></input>
-      </div>
+
+      {initStatus === 'success' && (
+        <>
+          <div>
+            IsEnable:{' '}
+            <strong
+              style={{
+                color: isEnable ? 'green' : 'red',
+              }}
+            >
+              {isEnable ? 'YES' : 'NO'}
+            </strong>
+          </div>
+          <div>
+            Weight: <strong>{userFitter.weight}</strong>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>isCheckedAndOk: </span>
+            <input
+              type="checkbox"
+              onChange={(e) => {
+                const checked = userFitter.weight >= 3
+                e.stopPropagation()
+                e.preventDefault()
+                onCheckedChange(!checked)
+              }}
+              checked={userFitter.weight >= 3}
+            ></input>
+          </div>
+        </>
+      )}
     </Panel>
   )
 }

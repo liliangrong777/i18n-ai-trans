@@ -40,7 +40,7 @@ const polyfillStrategy: Record<AppTypeEnum, PolyfillApi> = {
   [AppTypeEnum.PP]: {
     async submit(params) {
       if (params.type === TypeEnum.FakeUpdate) {
-        setCaptainThemeConfig(params)
+        await setCaptainThemeConfig(params)
       }
       return await setThemeConfig(params)
     },
@@ -99,7 +99,7 @@ const polyfillStrategy: Record<AppTypeEnum, PolyfillApi> = {
   [AppTypeEnum.Captain]: {
     async submit(params) {
       if (params.type === TypeEnum.PartialRender) {
-        setThemeConfig(params)
+        await setThemeConfig(params)
       }
       return await setCaptainThemeConfig(params)
     },
