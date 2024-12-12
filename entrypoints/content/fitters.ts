@@ -352,6 +352,8 @@ function updateSectionSelectorList() {
         '.cart__items .js-contents',
         '#cart-form',
         '.m-cart__items',
+        '.cart-item-list',
+        '.cart__items',
       ]
     : [
         '.cart-content-item .cart-list',
@@ -368,6 +370,8 @@ function updateSectionSelectorList() {
         '.m-cart__items',
         '.drawer__inner',
         '.cart-drawer__items',
+        '.cart-item-list',
+        '.cart__items',
       ]
 }
 
