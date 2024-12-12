@@ -8,6 +8,15 @@ export interface ShopifyInfo {
   country: string
   theme: any
 }
+
+function parseJsonOrStr(value) {
+  try {
+    return JSON.parse(value)
+  } catch (error) {
+    console.log(error)
+    return value
+  }
+}
 export function getShopifyInfo() {
   const info: ShopifyInfo = {
     themeName: '',
@@ -24,17 +33,12 @@ export function getShopifyInfo() {
     const content = scripts[i].textContent
     if (typeof content === 'string') {
       const reg =
-        /Shopify\.(shop|locale|currency|country|theme)\s*=\s*("?[^(;=)]+?"?);/g
+        /Shopify\.(shop|locale|currency|country|theme)\s*=\s*([^;]+);/g
       let match
 
       while ((match = reg.exec(content)) !== null) {
         const [_, name, value] = match
-        try {
-          info[name] = JSON.parse(value)
-        } catch (error) {
-          console.log(error)
-          info[name] = value
-        }
+        info[name] = parseJsonOrStr(value)
       }
       const match2 = content.match(/BOOMR.themeName\s*=\s*"(.+?)"/)
       if (match2) {
