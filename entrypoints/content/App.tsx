@@ -123,8 +123,13 @@ const App = () => {
     }).toString()
 
     const resThemeInfo = await polyfill.getFitter(queryString)
+    console.log('initData', { userInfo, resThemeInfo, shopify })
+
     setInitStatus(userInfo && resThemeInfo?.code === 200 ? 'success' : 'error')
-    if (!userInfo || !resThemeInfo || resThemeInfo.code !== 200) return
+    if (!userInfo || !resThemeInfo || resThemeInfo.code !== 200) {
+      window.__showToast('init Error', false)
+      return
+    }
     const { isEnable, isFit = false, status } = userInfo
     setIsEnable(isEnable)
     setIsFit(isFit)

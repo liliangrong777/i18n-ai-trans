@@ -4,7 +4,7 @@ import { defineConfig } from 'wxt'
 export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   manifest: {
-    name: 'Insurance extension',
+    name: '新版插件2.1',
     permissions: [
       'storage',
       'activeTab',
