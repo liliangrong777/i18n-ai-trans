@@ -64,7 +64,6 @@ const App = () => {
       })
       .then(async (res) => {
         if (res === 'ON') {
-          window.document.body.dataset.insurancePlugin = PluginInBodyStatus.on
           setPluginStatus(PluginInBodyStatus.on)
           const storageApp: any = window.sessionStorage.getItem(
             StorageKey.currentApp
@@ -75,7 +74,9 @@ const App = () => {
               ? AppTypeEnum.PP
               : AppTypeEnum.Captain
           window.__CurrentApp = currentApp
+          window.sessionStorage.setItem(StorageKey.currentApp, currentApp)
           setCurrentApp(currentApp)
+          window.document.body.dataset.insurancePlugin = PluginInBodyStatus.on
 
           init()
         } else {
