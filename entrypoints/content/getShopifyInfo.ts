@@ -31,7 +31,7 @@ export function getShopifyInfo() {
     const content = scripts[i].textContent
     if (typeof content === 'string') {
       const reg =
-        /Shopify\.(shop|locale|currency|country|theme)\s*=\s*([^;]+);/g
+        /Shopify\.(shop|locale|currency|country|theme)\s*=\s*([^;=]+);/g
       let match
 
       while ((match = reg.exec(content)) !== null) {
