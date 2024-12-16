@@ -4,7 +4,7 @@ import { defineConfig } from 'wxt'
 export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   manifest: {
-    name: '新版插件2.1',
+    name: '新版插件3.0',
     permissions: [
       'storage',
       'activeTab',

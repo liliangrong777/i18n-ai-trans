@@ -56,6 +56,17 @@ const App = () => {
     PluginInBodyStatus.pending
   )
   useLayoutEffect(() => {
+    // 设置当前app
+    const storageApp: any = window.sessionStorage.getItem(StorageKey.currentApp)
+    const currentApp = storageApp
+      ? storageApp
+      : checkedScriptKeywords(PPKey)
+        ? AppTypeEnum.PP
+        : AppTypeEnum.Captain
+    window.__CurrentApp = currentApp
+    window.sessionStorage.setItem(StorageKey.currentApp, currentApp)
+    setCurrentApp(currentApp)
+
     window.document.body.dataset.insurancePlugin = PluginInBodyStatus.pending
     setPluginStatus(PluginInBodyStatus.pending)
     browser.runtime
@@ -65,19 +76,7 @@ const App = () => {
       .then(async (res) => {
         if (res === 'ON') {
           setPluginStatus(PluginInBodyStatus.on)
-          const storageApp: any = window.sessionStorage.getItem(
-            StorageKey.currentApp
-          )
-          const currentApp = storageApp
-            ? storageApp
-            : checkedScriptKeywords(PPKey)
-              ? AppTypeEnum.PP
-              : AppTypeEnum.Captain
-          window.__CurrentApp = currentApp
-          window.sessionStorage.setItem(StorageKey.currentApp, currentApp)
-          setCurrentApp(currentApp)
           window.document.body.dataset.insurancePlugin = PluginInBodyStatus.on
-
           init()
         } else {
           window.document.body.dataset.insurancePlugin = PluginInBodyStatus.off
