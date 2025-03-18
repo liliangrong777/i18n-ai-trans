@@ -5,7 +5,7 @@ async function translate({ API_KEY, ENDPOINT_ID, SystemContent, translateContent
     try {
         const res = await axios({
             method: "post",
-            url: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
+            url: 'https://llm-hub.parcelpanel.com/v1/chat/completions',
             headers: {
                 "Authorization": `Bearer ${API_KEY}`,
                 "Content-Type": "application/json"
