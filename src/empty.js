@@ -1,6 +1,7 @@
 const path = require('path')
 const { execSync } = require("child_process")
-const { readFileSync, readdirSync, writeFileSync } = require('fs');
+const fs = require('fs'); 
+const { readFileSync, readdirSync, writeFileSync } = fs;
 
 async function execEmpty({ gitRoot, filePath, fileName }) {
     if (!gitRoot) throw "请配置gitRoot"
@@ -56,7 +57,7 @@ function empty(config) {
         execEmptyForDirectory({
             gitRoot: absGitRoot,
             sourceDir: absSourceDir,
-            targetLangs: config.targetLangs
+            targetLangs: config.langs.filter(item => item !== config.sourceLang)
         })
     } else {
         execEmpty({
