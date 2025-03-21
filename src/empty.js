@@ -51,7 +51,12 @@ async function execEmpty({ gitRoot, filePath, fileName }) {
 function empty(config) {
     const absGitRoot = path.join(process.cwd(), config.gitRoot)
     const absSourceDir = path.join(process.cwd(), config.translateDir, config.sourceLang);
-    const isDirectory = fs.lstatSync(absSourceDir).isDirectory();
+    let isDirectory;
+    try {
+        isDirectory = fs.lstatSync(absSourceDir).isDirectory();
+    } catch (err) {
+        isDirectory = false;
+    }
 
     if (isDirectory) {
         execEmptyForDirectory({
@@ -60,9 +65,10 @@ function empty(config) {
             targetLangs: config.langs.filter(item => item !== config.sourceLang)
         })
     } else {
+        const absFilePath = path.join(process.cwd(), config.translateDir, `${config.sourceLang}.json`)
         execEmpty({
             gitRoot: absGitRoot,
-            filePath: absSourceDir,
+            filePath: absFilePath,
             fileName:`${config.sourceLang}.json`
         })
     }
