@@ -1,11 +1,11 @@
 const axios = require('axios');
 
-async function translate({ API_KEY, ENDPOINT_ID, SystemContent, translateContent, lang }) {
+async function translate({SERVER_URL, API_KEY, ENDPOINT_ID, SystemContent, translateContent, lang }) {
 
     try {
         const res = await axios({
             method: "post",
-            url: 'https://llm-hub.parcelpanel.com/v1/chat/completions',
+            url: SERVER_URL,
             headers: {
                 "Authorization": `Bearer ${API_KEY}`,
                 "Content-Type": "application/json"

@@ -5,7 +5,7 @@ const { getMissContent, setMissContent, getLanguageContent, getLangStat, setLang
 const { translate } = require("./translate")
 
 const exec = (config) => {
-    const { translateDir, API_KEY, SystemContent, ENDPOINT_ID, sourceLang = 'en', langs = ['en', 'zh'] } = config
+    const { translateDir, SERVER_URL, API_KEY, SystemContent, ENDPOINT_ID, sourceLang = 'en', langs = ['en', 'zh'] } = config
     const absDir = path.join(progress.cwd(), translateDir)
     if (!fs.statSync(absDir).isDirectory()) throw '找不到需要翻译的目录：' + absDir
 
@@ -27,6 +27,7 @@ const exec = (config) => {
             return
         }
         const [translatorData, error] = await translate({
+            SERVER_URL: SERVER_URL || 'https://llm-hub.parcelpanel.com/v1/chat/completions',
             API_KEY,
             ENDPOINT_ID,
             SystemContent,
