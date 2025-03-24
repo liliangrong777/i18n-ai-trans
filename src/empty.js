@@ -114,38 +114,6 @@ async function getChangedKeysForFile(gitRoot, filePath) {
   }
 }
 
-function ensureDirectoryStructure(sourceDir, targetDirs) {
-  // 获取源目录结构
-  const sourceStructure = getDirectoryStructure(sourceDir);
-  
-  // 确保每个目标目录有相同结构
-  for (const targetDir of targetDirs) {
-    syncDirectoryStructure(sourceStructure, targetDir);
-  }
-}
-
-function syncDirectoryStructure(structure, targetBaseDir) {
-  // 递归创建缺失的目录
-  for (const dir of structure.directories) {
-    const targetDirPath = path.join(targetBaseDir, dir.relativePath);
-    if (!fs.existsSync(targetDirPath)) {
-      fs.mkdirSync(targetDirPath, { recursive: true });
-    }
-    
-    // 递归处理子目录
-    syncDirectoryStructure(dir, targetBaseDir);
-  }
-  
-  // 确保文件存在（可以为空）
-  for (const file of structure.files) {
-    const targetFilePath = path.join(targetBaseDir, file.relativePath);
-    if (!fs.existsSync(targetFilePath)) {
-      // 创建空的JSON文件，或复制模板
-      fs.writeFileSync(targetFilePath, '{}', 'utf-8');
-    }
-  }
-}
-
 async function execEmptyForDirectory(config) {
   const { gitRoot, sourceDir, targetLangs } = config;
   
