@@ -2,76 +2,187 @@ const path = require('path')
 const { execSync } = require("child_process")
 const fs = require('fs'); 
 const { readFileSync, readdirSync, writeFileSync } = fs;
+const { getLangStat } = require('./utils');
 
-async function execEmpty({ gitRoot, filePath, fileName }) {
-    if (!gitRoot) throw "请配置gitRoot"
-    const dir = path.dirname(filePath)
-    const relativePath = path.relative(gitRoot, filePath).replace(/\\/g, '/'); // 转换为相对路径
+/**
+ * 查找两个嵌套JSON对象之间的差异路径
+ * @param {Object} oldObj - 旧的JSON对象
+ * @param {Object} newObj - 新的JSON对象
+ * @param {String} parentPath - 父路径
+ * @param {Set} changedPaths - 变更路径集合
+ */
+function findChangedPaths(oldObj, newObj, parentPath = '', changedPaths = new Set()) {
+  // 检查旧对象中存在但新对象中不存在或值已更改的键
+  for (const key in oldObj) {
+    const currentPath = parentPath ? `${parentPath}.${key}` : key;
     
-    const stdout = await execSync(`git diff ${relativePath}`, { cwd: gitRoot, encoding: "utf-8" })
-    // 获取变化行的key
-    const changes = stdout.split('\n').filter(line => line.startsWith('+') || line.startsWith('-'));
-    const changedKeys = new Set();
-
-    changes.forEach(line => {
-        const match = line.match(/["']([^"']+)["']\s*:/); // 匹配 JSON key
-        if (match) {
-            changedKeys.add(match[1]);
-        }
-    });
-
-    const keys = [...changedKeys]
-    if (keys.length === 0) {
-        console.log('没有变化过的key');
-        return
+    // 键在新对象中不存在
+    if (!(key in newObj)) {
+      changedPaths.add(currentPath);
+      continue;
     }
-
-    // 获取所有的多语言文件
-    const files = await readdirSync(dir).filter(item => {
-        if (item.includes(fileName)) return false
-        return item.includes('.json')
-    })
-
-    // 遍历多语言文件
-    files.forEach(async item => {
-        const absPath = path.join(dir, item)
-        const res = await readFileSync(absPath)
-        const data = JSON.parse(res)
-        // 将变化过的key清空
-        keys.forEach(k => {
-            if (data[k]) {
-                data[k] = ""
-            }
-        })
-        await writeFileSync(absPath, JSON.stringify(data, null, 2), 'utf-8')
-    })
-    console.log('清空完成');
+    
+    // 两者都是对象，需要递归检查
+    if (typeof oldObj[key] === 'object' && oldObj[key] !== null && 
+        typeof newObj[key] === 'object' && newObj[key] !== null) {
+      findChangedPaths(oldObj[key], newObj[key], currentPath, changedPaths);
+    } 
+    // 值不同
+    else if (JSON.stringify(oldObj[key]) !== JSON.stringify(newObj[key])) {
+      changedPaths.add(currentPath);
+    }
+  }
+  
+  // 检查新对象中存在但旧对象中不存在的键
+  for (const key in newObj) {
+    if (!(key in oldObj)) {
+      const currentPath = parentPath ? `${parentPath}.${key}` : key;
+      changedPaths.add(currentPath);
+    }
+  }
+  
+  return changedPaths;
 }
 
-function empty(config) {
-    const absGitRoot = path.join(process.cwd(), config.gitRoot)
-    const absSourceDir = path.join(process.cwd(), config.translateDir, config.sourceLang);
-    let isDirectory;
-    try {
-        isDirectory = fs.lstatSync(absSourceDir).isDirectory();
-    } catch (err) {
-        isDirectory = false;
+/**
+ * 根据路径清空对象中的特定值
+ * @param {Object} obj - 要修改的对象
+ * @param {String} path - 点分隔的路径，如 "a.b.c"
+ */
+function clearValueAtPath(obj, path) {
+  const parts = path.split('.');
+  let current = obj;
+  
+  // 遍历路径的所有部分，除了最后一个
+  for (let i = 0; i < parts.length - 1; i++) {
+    const part = parts[i];
+    // 如果路径中间的对象不存在，则不需要继续
+    if (!current[part] || typeof current[part] !== 'object') {
+      return;
     }
-
-    if (isDirectory) {
-        execEmptyForDirectory({
-            gitRoot: absGitRoot,
-            sourceDir: absSourceDir,
-            targetLangs: config.langs.filter(item => item !== config.sourceLang)
-        })
+    current = current[part];
+  }
+  
+  // 获取最后一个部分（要清空的键）
+  const lastPart = parts[parts.length - 1];
+  
+  // 如果该键存在，将其清空
+  if (lastPart in current) {
+    if (typeof current[lastPart] === 'object' && current[lastPart] !== null) {
+      // 如果是对象，递归清空所有值
+      clearObjectValues(current[lastPart]);
     } else {
-        const absFilePath = path.join(process.cwd(), config.translateDir, `${config.sourceLang}.json`)
-        execEmpty({
-            gitRoot: absGitRoot,
-            filePath: absFilePath,
-            fileName:`${config.sourceLang}.json`
-        })
+      current[lastPart] = "";
     }
+  }
+}
+
+/**
+ * 递归清空对象中的所有值
+ * @param {Object} obj - 要清空的对象
+ */
+function clearObjectValues(obj) {
+  for (const key in obj) {
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
+      clearObjectValues(obj[key]);
+    } else {
+      obj[key] = "";
+    }
+  }
+}
+
+async function execEmpty({ gitRoot, filePath, fileName }) {
+  if (!gitRoot) throw "请配置gitRoot";
+  const dir = path.dirname(filePath);
+  const relativePath = path.relative(gitRoot, filePath).replace(/\\/g, '/');
+  
+  // 获取旧内容
+  let oldContent = {};
+  try {
+    const oldContentStr = await execSync(`git show HEAD~1:${relativePath}`, { cwd: gitRoot, encoding: "utf-8" });
+    oldContent = JSON.parse(oldContentStr);
+  } catch (err) {
+    console.warn(`获取文件 ${relativePath} 的历史版本失败:`, err.message);
+    console.log('将使用空对象作为旧内容进行比较');
+  }
+  
+  // 获取新内容
+  let newContent = {};
+  try {
+    const newContentStr = await readFileSync(filePath, "utf-8");
+    newContent = JSON.parse(newContentStr);
+  } catch (err) {
+    console.error(`读取文件 ${filePath} 失败:`, err.message);
+    return;
+  }
+  
+  // 获取变化的路径
+  const changedPaths = findChangedPaths(oldContent, newContent);
+  
+  if (changedPaths.size === 0) {
+    console.log('没有变化过的key');
+    return;
+  }
+  
+  console.log(`找到 ${changedPaths.size} 个变化的路径`);
+  
+  // 获取所有的多语言文件
+  const files = await readdirSync(dir).filter(item => {
+    if (item.includes(fileName)) return false;
+    return item.includes('.json');
+  });
+
+  // 遍历多语言文件
+  for (const item of files) {
+    const absPath = path.join(dir, item);
+    try {
+      const res = await readFileSync(absPath, "utf-8");
+      const data = JSON.parse(res);
+      
+      // 清空所有变化路径的值
+      changedPaths.forEach(path => {
+        clearValueAtPath(data, path);
+      });
+      
+      await writeFileSync(absPath, JSON.stringify(data, null, 2), 'utf-8');
+      console.log(`已更新文件: ${item}`);
+    } catch (err) {
+      console.error(`处理文件 ${absPath} 时出错:`, err.message);
+    }
+  }
+  
+  console.log('清空完成');
+}
+
+async function getChangedPathsForFile(gitRoot, filePath) {
+  const relativePath = path.relative(gitRoot, filePath).replace(/\\/g, '/');
+  
+  try {
+    // 获取旧内容
+    let oldContent = {};
+    try {
+      const oldContentStr = await execSync(`git show HEAD~1:${relativePath}`, { cwd: gitRoot, encoding: "utf-8" });
+      oldContent = JSON.parse(oldContentStr);
+    } catch (err) {
+      console.warn(`获取文件 ${relativePath} 的历史版本失败:`, err.message);
+      console.log('将使用空对象作为旧内容进行比较');
+    }
+    
+    // 获取新内容
+    let newContent = {};
+    try {
+      const newContentStr = await fs.readFileSync(filePath, "utf-8");
+      newContent = JSON.parse(newContentStr);
+    } catch (err) {
+      console.error(`读取文件 ${filePath} 失败:`, err.message);
+      return new Set();
+    }
+    
+    return findChangedPaths(oldContent, newContent);
+  } catch (err) {
+    console.warn(`获取文件 ${relativePath} 的变更信息失败`, err.message);
+    return new Set();
+  }
 }
 
 function getAllJsonFiles(dirPath) {
@@ -101,35 +212,21 @@ function findCorrespondingFile(sourceFile, sourceDir, targetDir) {
   return path.join(targetDir, relativePath);
 }
 
-async function getChangedKeysForFile(gitRoot, filePath) {
-  const relativePath = path.relative(gitRoot, filePath).replace(/\\/g, '/');
-  
-  try {
-    const stdout = await execSync(`git diff ${relativePath}`, { cwd: gitRoot, encoding: "utf-8" });
-    // 解析更改的键...
-    return extractChangedKeys(stdout);
-  } catch (err) {
-    console.warn(`获取文件 ${relativePath} 的变更信息失败`, err.message);
-    return [];
-  }
-}
-
 async function execEmptyForDirectory(config) {
   const { gitRoot, sourceDir, targetLangs } = config;
   
-  // 1. 获取所有源JSON文件
+  // 使用utils.js中的函数获取源语言内容
   const sourceFiles = getAllJsonFiles(sourceDir);
   
-  // 2. 为每个源文件处理变更
   for (const sourceFile of sourceFiles) {
-    // 获取变更的键
-    const changedKeys = await getChangedKeysForFile(gitRoot, sourceFile);
+    // 获取变更的路径
+    const changedPaths = await getChangedPathsForFile(gitRoot, sourceFile);
     
-    if (changedKeys.length === 0) continue;
+    if (changedPaths.size === 0) continue;
     
-    console.log(`文件 ${path.relative(process.cwd(), sourceFile)} 有 ${changedKeys.length} 个键发生变化`);
+    console.log(`文件 ${path.relative(process.cwd(), sourceFile)} 有 ${changedPaths.size} 个路径发生变化`);
     
-    // 3. 处理每个目标语言
+    // 处理每个目标语言
     for (const lang of targetLangs) {
       const targetDir = path.join(path.dirname(sourceDir), lang);
       const targetFile = findCorrespondingFile(sourceFile, sourceDir, targetDir);
@@ -148,48 +245,42 @@ async function execEmptyForDirectory(config) {
         const content = fs.readFileSync(targetFile, 'utf-8');
         const data = JSON.parse(content);
         
-        changedKeys.forEach(key => {
-          if (data[key] !== undefined) {
-            data[key] = "";
-          }
+        changedPaths.forEach(path => {
+          clearValueAtPath(data, path);
         });
         
         fs.writeFileSync(targetFile, JSON.stringify(data, null, 2), 'utf-8');
+        console.log(`已更新文件: ${path.relative(process.cwd(), targetFile)}`);
       } catch (err) {
         console.error(`处理文件 ${targetFile} 时出错:`, err.message);
       }
     }
   }
   
-  console.log('所有变更键清空完成');
+  console.log('所有变更路径清空完成');
 }
 
-/**
- * 从Git diff输出中提取变更的JSON键
- * @param {string} diffOutput - git diff命令的输出
- * @returns {string[]} - 变更的键列表
- */
-function extractChangedKeys(diffOutput) {
-  const changedKeys = new Set();
-  
-  // 获取变化行（以 + 或 - 开头的行）
-  const changes = diffOutput.split('\n').filter(line => 
-    line.startsWith('+') || line.startsWith('-')
-  );
-  
-  // 提取JSON键名
-  changes.forEach(line => {
-    // 移除前导的 + 或 -
-    const contentLine = line.substring(1).trim();
-    
-    // 匹配 JSON 键模式: "key": value 或 'key': value
-    const match = contentLine.match(/["']([^"']+)["']\s*:/);
-    if (match) {
-      changedKeys.add(match[1]);
-    }
-  });
-  
-  return [...changedKeys];
+function empty(config) {
+  const absGitRoot = path.join(process.cwd(), config.gitRoot);
+  const { isDir, isFile } = getLangStat(path.join(process.cwd(), config.translateDir), config.sourceLang);
+
+  if (isDir) {
+    const absSourceDir = path.join(process.cwd(), config.translateDir, config.sourceLang);
+    execEmptyForDirectory({
+      gitRoot: absGitRoot,
+      sourceDir: absSourceDir,
+      targetLangs: config.langs.filter(item => item !== config.sourceLang)
+    });
+  } else if (isFile) {
+    const absFilePath = path.join(process.cwd(), config.translateDir, `${config.sourceLang}.json`);
+    execEmpty({
+      gitRoot: absGitRoot,
+      filePath: absFilePath,
+      fileName: `${config.sourceLang}.json`
+    });
+  } else {
+    console.error(`找不到语言源文件或目录: ${config.sourceLang}`);
+  }
 }
 
-module.exports = { empty } 
+module.exports = { empty }; 
