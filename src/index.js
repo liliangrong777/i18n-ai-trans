@@ -35,7 +35,7 @@ const exec = (config) => {
             lang,
             translateContent,
             onProgress: (progress) => {
-                console.log(`翻译进度: ${progress.percentage}% (${progress.current}/${progress.total})`);
+                console.log(`${progress.lang} 翻译进度: ${progress.percentage}% (${progress.current}/${progress.total})`);
             }
         })
         if (translatorData) {
@@ -45,10 +45,8 @@ const exec = (config) => {
             setLanguageContent(absDir, lang, isDir, langContent)
             console.log(`${lang} 更新成功`);
         } else {
-            console.log(`${lang} 更新失败`, error);
+            console.log(`${lang} 更新失败`);
         }
-        // 添加延迟以避免API限制
-        await new Promise(resolve => setTimeout(resolve, 500*Math.random()));
     })
 }
 

@@ -1,22 +1,21 @@
 const axios = require('axios');
 
-function chunkObject(obj) {
+function chunkObject(obj, chunkSize) {
     // 将对象按照键值对拆分成更小的块
     const entries = Object.entries(obj);
     const chunks = [];
-    const CHUNK_SIZE = 30; // 可以根据实际情况调整块大小
     
-    for (let i = 0; i < entries.length; i += CHUNK_SIZE) {
-        const chunk = Object.fromEntries(entries.slice(i, i + CHUNK_SIZE));
+    for (let i = 0; i < entries.length; i += chunkSize) {
+        const chunk = Object.fromEntries(entries.slice(i, i + chunkSize));
         chunks.push(chunk);
     }
     return chunks;
 }
 
-async function translate({SERVER_URL, API_KEY, ENDPOINT_ID, SystemContent, translateContent, lang, onProgress }) {
+async function translate({SERVER_URL, API_KEY, ENDPOINT_ID, SystemContent, translateContent, lang, chunkSize = 50, onProgress }) {
     try {
         // 如果内容较大，进行分块处理
-        const chunks = chunkObject(translateContent);
+        const chunks = chunkObject(translateContent, chunkSize);
         let finalResult = {};
         const totalChunks = chunks.length;
 
@@ -55,7 +54,8 @@ async function translate({SERVER_URL, API_KEY, ENDPOINT_ID, SystemContent, trans
                 current: i + 1,
                 total: totalChunks,
                 percentage: Math.round(((i + 1) / totalChunks) * 100),
-                currentChunk: chunk
+                currentChunk: chunk,
+                lang: lang
             };
             
             if (onProgress) {
@@ -63,12 +63,11 @@ async function translate({SERVER_URL, API_KEY, ENDPOINT_ID, SystemContent, trans
             }
             
             // 添加随机延迟以避免API限制
-            await new Promise(resolve => setTimeout(resolve, 1000*Math.random()));
+            await new Promise(resolve => setTimeout(resolve, 500*Math.random()));
         }
         
         return [finalResult];
     } catch (error) {
-        console.error('translate failed');
         return [null, error.response?.data?.error];
     }
 }
