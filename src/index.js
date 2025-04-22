@@ -16,17 +16,31 @@ const exec = (config) => {
 
     // 获取源语言(一般是英文)内容
     const enContent = getLanguageContent(absDir, sourceLang)
-    translateLangs.forEach(async lang => {
+    const maxConcurrentRequests = 3;
+    const translateQueue = [...translateLangs];
+    let activeRequests = 0;
+
+    const processQueue = async () => {
+        if (translateQueue.length === 0 || activeRequests >= maxConcurrentRequests) {
+            return;
+        }
+
+        const lang = translateQueue.shift();
+        activeRequests++;
+
         // 获取翻译语言的内容
-        const langContent = getLanguageContent(absDir, lang)
+        const langContent = getLanguageContent(absDir, lang);
         // 只需要翻译缺失和未翻译的字段
-        const translateContent = getMissContent(enContent, langContent)
+        const translateContent = getMissContent(enContent, langContent);
 
         if (!translateContent) {
             console.log(`${lang} 尚未发现新增文本`);
-            return
+            activeRequests--;
+            processQueue();
+            return;
         }
-        console.log(`${lang} 开始翻译 ${Object.keys(translateContent).length} 条文本`)
+
+        console.log(`${lang} 开始翻译 ${Object.keys(translateContent).length} 条文本`);
         const [translatorData, error] = await translate({
             SERVER_URL: SERVER_URL || 'https://llm-hub.parcelpanel.com/v1/chat/completions',
             API_KEY,
@@ -38,17 +52,25 @@ const exec = (config) => {
                 console.log(`${progress.lang} 翻译进度: ${progress.percentage}% (${progress.current}/${progress.total})`);
             },
             chunkSize
-        })
+        });
+
         if (translatorData) {
             // 填充翻译内容
-            setMissContent(langContent, translatorData)
+            setMissContent(langContent, translatorData);
             // 写入新的文件内容
-            setLanguageContent(absDir, lang, isDir, langContent)
+            setLanguageContent(absDir, lang, isDir, langContent);
             console.log(`${lang} 更新成功`);
         } else {
-            console.log(`${lang} 更新失败`,error);
+            console.log(`${lang} 更新失败`, error);
         }
-    })
+
+        activeRequests--;
+        processQueue();
+    };
+
+    for (let i = 0; i < maxConcurrentRequests; i++) {
+        processQueue();
+    }
 }
 
 module.exports = {
