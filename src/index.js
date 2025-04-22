@@ -1,6 +1,7 @@
 const fs = require("fs")
 const path = require("path")
 const progress = require("process")
+const pLimit = require('p-limit')
 const { getMissContent, setMissContent, getLanguageContent, getLangStat, setLanguageContent } = require('./utils')
 const { translate } = require("./translate")
 
@@ -13,10 +14,11 @@ const exec = (config) => {
     if (!isDir && !isFile) throw `找不到 ${sourceLang} 需要翻译内容`
 
     const translateLangs = langs.filter(item => item !== sourceLang)
+    const limit = pLimit(3) // 限制并发数为3
 
     // 获取源语言(一般是英文)内容
     const enContent = getLanguageContent(absDir, sourceLang)
-    translateLangs.forEach(async lang => {
+    const promises = translateLangs.map(lang => limit(async () => {
         // 获取翻译语言的内容
         const langContent = getLanguageContent(absDir, lang)
         // 只需要翻译缺失和未翻译的字段
@@ -48,7 +50,9 @@ const exec = (config) => {
         } else {
             console.log(`${lang} 更新失败`,error);
         }
-    })
+    }))
+
+    return Promise.all(promises)
 }
 
 module.exports = {

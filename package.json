@@ -24,7 +24,8 @@
   "author": "liliangrong<leo.lee@channelwill.com>",
   "license": "MIT",
   "dependencies": {
-    "axios": "^1.7.3"
+    "axios": "^1.7.3",
+    "p-limit": "^6.2.0"
   },
   "devDependencies": {
     "release-it": "^14.14.3"
