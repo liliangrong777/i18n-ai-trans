@@ -26,13 +26,17 @@ const exec = (config) => {
             console.log(`${lang} 尚未发现新增文本`);
             return
         }
+        console.log(`${lang} 开始翻译 ${Object.keys(translateContent).length} 条文本`)
         const [translatorData, error] = await translate({
             SERVER_URL: SERVER_URL || 'https://llm-hub.parcelpanel.com/v1/chat/completions',
             API_KEY,
             ENDPOINT_ID,
             SystemContent,
             lang,
-            translateContent
+            translateContent,
+            onProgress: (progress) => {
+                console.log(`翻译进度: ${progress.percentage}% (${progress.current}/${progress.total})`);
+            }
         })
         if (translatorData) {
             // 填充翻译内容
@@ -43,6 +47,8 @@ const exec = (config) => {
         } else {
             console.log(`${lang} 更新失败`, error);
         }
+        // 添加延迟以避免API限制
+        await new Promise(resolve => setTimeout(resolve, 500*Math.random()));
     })
 }
 
