@@ -87,7 +87,7 @@ module.exports = {
 | `sourceLang?`   | 源语言 默认：en                                                                                                                         |
 | `langs?`        | app需要支持哪些语言，例如：["en", "zh-CN"]                                                                                              |
 | `gitRoot?`        | git根目录，相对路径                                                                                 |
-| `chunkSize?`        | 每次最多翻译多少条文本 默认：50              
+| `chunkSize?`        | 每次最多翻译多少条文本 100              
 
 ### 开始翻译
 

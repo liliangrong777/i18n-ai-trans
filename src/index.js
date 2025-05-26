@@ -5,7 +5,7 @@ const { getMissContent, setMissContent, getLanguageContent, getLangStat, setLang
 const { translate } = require("./translate")
 
 const exec = (config) => {
-    const { translateDir, SERVER_URL, API_KEY, SystemContent, ENDPOINT_ID, sourceLang = 'en', langs = ['en', 'zh'], chunkSize = 50 } = config
+    const { translateDir, SERVER_URL, API_KEY, SystemContent, ENDPOINT_ID, sourceLang = 'en', langs = ['en', 'zh'], chunkSize = 100 } = config
     const absDir = path.join(progress.cwd(), translateDir)
     if (!fs.statSync(absDir).isDirectory()) throw '找不到需要翻译的目录：' + absDir
 
@@ -15,7 +15,9 @@ const exec = (config) => {
     const translateLangs = langs.filter(item => item !== sourceLang)
 
     // 获取源语言(一般是英文)内容
-    const enContent = getLanguageContent(absDir, sourceLang)
+    let enSourceObj = getLanguageContent(absDir, sourceLang)
+    const enContent = Object.fromEntries(Object.entries(enSourceObj).filter(([_, value]) => value !== ""));
+    
     const maxConcurrentRequests = 3;
     const translateQueue = [...translateLangs];
     let activeRequests = 0;
@@ -48,9 +50,6 @@ const exec = (config) => {
             SystemContent,
             lang,
             translateContent,
-            onProgress: (progress) => {
-                console.log(`${progress.lang} 翻译进度: ${progress.percentage}% (${progress.current}/${progress.total})`);
-            },
             chunkSize
         });
 
