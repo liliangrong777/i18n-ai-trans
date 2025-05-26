@@ -9,21 +9,16 @@ async function translate({ SERVER_URL, API_KEY, ENDPOINT_ID, SystemContent, tran
         await new Promise(resolve => setTimeout(resolve, delay));
 
 
-        async function splitTranslate(contentObj, count) {
-            const res = await Promise.all(splitObject(contentObj, count).map((part, i) => recursiveTranslate(part, Math.random() * 100 + i * 100)));
-            return Object.assign({}, ...res);
-        }
-
         try {
             const contentLength = Object.keys(contentObj).length;
-            if(contentLength <= chunkSize){
+            if (contentLength > chunkSize) {
+                const res = await Promise.all(splitObjectByLength(contentObj, chunkSize).map((part, i) => recursiveTranslate(part, Math.random() * 100 + i * 100)));
+                return Object.assign({}, ...res);
+            } else {
                 const content = await callTranslate({ SERVER_URL, API_KEY, ENDPOINT_ID, SystemContent, contentObj, lang })
                 successCount = successCount + contentLength;
                 console.log(`${lang} 翻译成功 ${successCount}/${totalCount}`);
                 return JSON.parse(content);
-            }else{
-                const count = Math.ceil(contentLength / chunkSize);
-                return await splitTranslate(contentObj, count);
             }
         } catch (error) {
             // 如果内容只有10个 key，直接返回错误
@@ -32,7 +27,8 @@ async function translate({ SERVER_URL, API_KEY, ENDPOINT_ID, SystemContent, tran
                 return {};
             }
             // 2分递归
-            return await splitTranslate(contentObj, 2);
+            const res = await Promise.all(splitObjectInHalf(contentObj).map((part, i) => recursiveTranslate(part, Math.random() * 100 + i * 100)));
+            return Object.assign({}, ...res);
         }
     }
 
@@ -49,18 +45,29 @@ module.exports = {
 
 
 // 任意拆分对象
-function splitObject(obj, parts = 2) {
+function splitObjectInHalf(obj) {
     const entries = Object.entries(obj);
-    const partSize = Math.ceil(entries.length / parts);
+    const partSize = Math.ceil(entries.length / 2);
     const result = [];
 
-    for (let i = 0; i < parts; i++) {
+    for (let i = 0; i < 2; i++) {
         const start = i * partSize;
         const end = start + partSize;
         const part = Object.fromEntries(entries.slice(start, end));
         result.push(part);
     }
 
+    return result;
+}
+
+function splitObjectByLength(obj, length) {
+    // 将obj拆分成多个length长度的对象
+    const entries = Object.entries(obj);
+    const result = [];
+    for (let i = 0; i < entries.length; i += length) {
+        const part = Object.fromEntries(entries.slice(i, i + length));
+        result.push(part);
+    }
     return result;
 }
 
