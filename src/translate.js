@@ -92,7 +92,8 @@ async function callTranslate({ SERVER_URL, API_KEY, ENDPOINT_ID, SystemContent, 
                     "content": JSON.stringify(contentObj, null, 2) + ' ' + lang
                 }
             ],
-            "temperature": 0.2
+            "temperature": 0.2,
+            "response_format": { "type": "json_object" }
         }
     })
     return res.data.choices[0].message.content;
