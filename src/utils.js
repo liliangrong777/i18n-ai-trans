@@ -76,7 +76,7 @@ function getLanguageContent(absDir, lang) {
 }
 
 
-function setLanguageContent(absDir, lang, isDir, langContent) {
+function setLanguageContent(absDir, lang, isDir, langContent, eolLine) {
     if (isDir) {
         const dirPath = path.join(absDir, lang)
         if (!fs.existsSync(dirPath)) {
@@ -85,10 +85,11 @@ function setLanguageContent(absDir, lang, isDir, langContent) {
         Object.keys(langContent).forEach(nameSpace => {
             const file = nameSpace + '.json'
             const filePath = path.join(dirPath, file)
-            fs.writeFileSync(filePath, JSON.stringify(langContent[nameSpace], null, 2), "utf8")
+            const content = JSON.stringify(langContent[nameSpace], null, 2)
+            fs.writeFileSync(filePath, content + (eolLine ? '\n' : ''), "utf8")
         })
     } else {
-        fs.writeFileSync(path.join(absDir, `${lang}.json`), JSON.stringify(langContent, null, 2), "utf8")
+        fs.writeFileSync(path.join(absDir, `${lang}.json`), JSON.stringify(langContent, null, 2) + (eolLine ? '\n' : ''), "utf8")
     }
 
 }

@@ -5,7 +5,7 @@ const { getMissContent, setMissContent, getLanguageContent, getLangStat, setLang
 const { translate } = require("./translate")
 const { execQueue } = require("./queue")
 const exec = async (config) => {
-    const { translateDir, SERVER_URL, API_KEY, SystemContent, ENDPOINT_ID, sourceLang = 'en', langs = ['en', 'zh'], chunkSize = 100 } = config
+    const { translateDir, SERVER_URL, API_KEY, SystemContent, ENDPOINT_ID, sourceLang = 'en', langs = ['en', 'zh'], chunkSize = 100, eolLine = false } = config
     const absDir = path.join(progress.cwd(), translateDir)
     if (!fs.statSync(absDir).isDirectory()) throw '找不到需要翻译的目录：' + absDir
 
@@ -52,7 +52,7 @@ const exec = async (config) => {
                     // 填充翻译内容
                     setMissContent(langContent, translatorData);
                     // 写入新的文件内容
-                    setLanguageContent(absDir, lang, isDir, langContent);
+                    setLanguageContent(absDir, lang, isDir, langContent, eolLine);
                     console.log(`${lang} 更新成功`);
                 } else {
                     console.log(`${lang} 更新失败`, error);
