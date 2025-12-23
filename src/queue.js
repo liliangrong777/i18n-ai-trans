@@ -1,4 +1,5 @@
 function execQueue(arr, maxQueue) {
+    if(arr.length === 0) return Promise.resolve();
     return new Promise(async (resolve) => {
         const queue = [];
         let activeCount = 0;
